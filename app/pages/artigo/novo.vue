@@ -27,6 +27,7 @@ watchEffect(() => {
 
 const MAX_TAGS = 10
 const MAX_TAG_LENGTH = 50
+const MIN_CONTENT_LENGTH = 4500
 
 const addTag = () => {
   let tag = tagInput.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '')
@@ -119,6 +120,13 @@ const handleSubmit = async () => {
 
   if (!editorContent.value.trim() || editorRef.value?.isEmpty()) {
     error.value = 'O conteúdo do artigo é obrigatório'
+    return
+  }
+
+  const contentToValidate = editorRef.value?.getContent() ?? editorContent.value
+  const textContent = contentToValidate.replace(/<[^>]*>/g, '').trim()
+  if (textContent.length < MIN_CONTENT_LENGTH) {
+    error.value = `O conteúdo do artigo deve ter no mínimo ${MIN_CONTENT_LENGTH} caracteres.`
     return
   }
 

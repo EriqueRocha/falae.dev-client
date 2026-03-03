@@ -18,6 +18,7 @@ watchEffect(() => {
 
 const MAX_TAGS = 10
 const MAX_TAG_LENGTH = 50
+const MIN_CONTENT_LENGTH = 2000
 
 const addTag = () => {
   let tag = tagInput.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '')
@@ -65,6 +66,11 @@ const handleSubmit = async () => {
 
   if (!topicContent.value.trim()) {
     error.value = 'O conteudo do topico e obrigatorio'
+    return
+  }
+
+  if (topicContent.value.trim().length < MIN_CONTENT_LENGTH) {
+    error.value = `O conteúdo do tópico deve ter no mínimo ${MIN_CONTENT_LENGTH} caracteres.`
     return
   }
 
