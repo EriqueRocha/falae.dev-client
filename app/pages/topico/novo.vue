@@ -1,0 +1,185 @@
+<script setup lang="ts">
+const { isAuthenticated } = useAuth()
+const config = useRuntimeConfig()
+const apiBase = config.public.apiBase
+
+const title = ref('')
+const topicContent = ref('')
+const tags = ref<string[]>([])
+const tagInput = ref('')
+const error = ref('')
+const isPublishing = ref(false)
+
+watchEffect(() => {
+  if (!isAuthenticated.value) {
+    navigateTo('/login')
+  }
+})
+
+const MAX_TAGS = 10
+const MAX_TAG_LENGTH = 50
+
+const addTag = () => {
+  let tag = tagInput.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '')
+  if (!tag) return
+
+  tag = tag.slice(0, MAX_TAG_LENGTH)
+
+  if (tags.value.includes(tag)) {
+    tagInput.value = ''
+    return
+  }
+
+  if (tags.value.length >= MAX_TAGS) return
+
+  tags.value.push(tag)
+  tagInput.value = ''
+}
+
+const removeTag = (index: number) => {
+  tags.value.splice(index, 1)
+}
+
+const handleTagKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault()
+    addTag()
+  }
+}
+
+const onTagInput = (e: Event) => {
+  const input = e.target as HTMLInputElement
+  let value = input.value.toLowerCase().replace(/[^a-z0-9]/g, '')
+  value = value.slice(0, MAX_TAG_LENGTH)
+  input.value = value
+  tagInput.value = value
+}
+
+const handleSubmit = async () => {
+  error.value = ''
+
+  if (!title.value.trim()) {
+    error.value = 'O titulo e obrigatorio'
+    return
+  }
+
+  if (!topicContent.value.trim()) {
+    error.value = 'O conteudo do topico e obrigatorio'
+    return
+  }
+
+  isPublishing.value = true
+
+  try {
+    const response = await $fetch<{ id: string; title: string }>(
+      `${apiBase}/api/topic/saveNew`,
+      {
+        method: 'POST',
+        credentials: 'include',
+        body: {
+          title: title.value,
+          topicContent: topicContent.value,
+          tags: tags.value.length > 0 ? tags.value : null
+        }
+      }
+    )
+
+    navigateTo('/')
+  } catch (e) {
+    error.value = 'Erro ao publicar topico. Tente novamente.'
+  } finally {
+    isPublishing.value = false
+  }
+}
+</script>
+
+<template>
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <div class="bg-slate-900 rounded-xl p-8 border border-slate-800">
+      <h1 class="text-2xl font-bold text-white mb-8">Criar Topico</h1>
+
+      <form @submit.prevent="handleSubmit" class="space-y-6">
+        <div v-if="error" class="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-lg text-sm">
+          {{ error }}
+        </div>
+
+        <div>
+          <label class="block text-slate-300 text-sm font-medium mb-2">Titulo*</label>
+          <input
+            v-model="title"
+            type="text"
+            placeholder="Digite o titulo do topico"
+            class="w-full bg-slate-800 text-white placeholder-slate-500 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label class="block text-slate-300 text-sm font-medium mb-2">Tags*</label>
+          <div class="flex flex-wrap gap-2 mb-2">
+            <span
+                v-for="(tag, index) in tags"
+                :key="index"
+                class="inline-flex items-center gap-1 bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full text-sm"
+            >
+              #{{ tag }}
+              <button
+                  type="button"
+                  @click="removeTag(index)"
+                  class="hover:text-blue-200 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </span>
+          </div>
+          <div v-if="tags.length < MAX_TAGS" class="flex gap-2">
+            <input
+                :value="tagInput"
+                type="text"
+                placeholder="Adicione e pressione Enter (apenas letras e números)"
+                @input="onTagInput"
+                @keydown="handleTagKeydown"
+                class="flex-1 bg-slate-800 text-white placeholder-slate-500 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+                type="button"
+                @click="addTag"
+                class="px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+            >
+              Adicionar
+            </button>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">
+            {{ tags.length }}/{{ MAX_TAGS }} tags (máx. {{ MAX_TAG_LENGTH }} caracteres cada)
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 text-sm font-medium mb-2">Conteudo*</label>
+          <MarkdownEditor
+            v-model="topicContent"
+            placeholder="Escreva o conteúdo do seu tópico em Markdown..."
+            :rows="10"
+          />
+        </div>
+
+        <div class="flex gap-4 pt-4">
+          <NuxtLink
+            to="/"
+            class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+          >
+            Cancelar
+          </NuxtLink>
+          <button
+            type="submit"
+            :disabled="isPublishing"
+            class="flex-1 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white font-medium py-3 rounded-lg transition-colors"
+          >
+            {{ isPublishing ? 'Publicando...' : 'Publicar Topico' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>
