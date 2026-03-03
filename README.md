@@ -1,75 +1,75 @@
-# Nuxt Minimal Starter
+# Falae.dev - Client
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Frontend da plataforma **Falae.dev**, uma comunidade para compartilhamento de artigos e discussões técnicas.
 
-## Setup
+## Tecnologias
 
-Make sure to install dependencies:
+- **Nuxt 4** - Framework Vue.js com SSR
+- **Vue 3** - Framework reativo
+- **TailwindCSS** - Estilização utilitária
+- **Tiptap** - Editor de texto rico
+- **KaTeX** - Renderização de fórmulas LaTeX
+- **Mermaid** - Diagramas e fluxogramas
+- **Lowlight** - Syntax highlighting para código
+
+## Funcionalidades
+
+- Publicação de artigos e tópicos
+- Editor WYSIWYG com suporte a Markdown, código, LaTeX e diagramas
+- Sistema de comentários
+- Autenticação (Google + email/senha)
+- Perfis de usuário
+- Busca de conteúdo
+
+## Rodando Localmente
+
+### Pré-requisitos
+
+- Node.js 18+
+- npm (ou pnpm/yarn/bun)
+
+### Instalação
 
 ```bash
-# npm
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
+### Desenvolvimento
 
 ```bash
-# npm
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+O servidor estará disponível em `http://localhost:3000`
 
-Build the application for production:
+### Build de Produção
 
 ```bash
-# npm
 npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
 ```
 
-Locally preview production build:
+### Preview do Build
 
 ```bash
-# npm
 npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Configuração
+
+Variáveis de ambiente (opcional):
+
+| Variável | Descrição | Padrão |
+|----------|-----------|--------|
+| `NUXT_PUBLIC_GOOGLE_CLIENT_ID` | Client ID do Google OAuth | - |
+
+## Estrutura do Projeto
+
+```
+app/
+├── components/     # Componentes Vue reutilizáveis
+├── composables/    # Composables (lógica compartilhada)
+├── extensions/     # Extensões do Tiptap (LaTeX, Mermaid)
+├── layouts/        # Layouts da aplicação
+├── pages/          # Páginas/rotas
+└── utils/          # Funções utilitárias
+```
