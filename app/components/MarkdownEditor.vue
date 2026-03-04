@@ -323,23 +323,23 @@ onUnmounted(() => {
 <template>
   <div class="markdown-editor">
 
-    <div class="editor-tabs flex items-center justify-between w-full px-4 py-2 bg-zinc-900">
-      <div class="flex items-center gap-2">
+    <div class="editor-tabs flex items-center justify-between w-full px-2 sm:px-4 py-2 bg-zinc-900">
+      <div class="flex items-center gap-1 sm:gap-2">
         <button
             type="button"
-            class="tab-btn flex items-center gap-1 text-white/70 hover:text-white transition"
+            class="tab-btn flex items-center gap-1 text-white/70 hover:text-white transition text-sm sm:text-base"
             :class="{ 'text-white font-semibold': !showPreview }"
             @click="showPreview = false"
         >
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
           </svg>
-          Escrever
+          <span class="hidden xs:inline">Escrever</span>
         </button>
 
         <button
             type="button"
-            class="tab-btn flex items-center gap-1 text-white/70 hover:text-white transition"
+            class="tab-btn flex items-center gap-1 text-white/70 hover:text-white transition text-sm sm:text-base"
             :class="{ 'text-white font-semibold': showPreview }"
             @click="showPreview = true"
         >
@@ -347,23 +347,23 @@ onUnmounted(() => {
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
             <circle cx="12" cy="12" r="3" />
           </svg>
-          Visualizar
+          <span class="hidden xs:inline">Visualizar</span>
         </button>
       </div>
 
-      <div class="flex items-center gap-2 text-white">
+      <div class="flex items-center gap-1 sm:gap-2 text-white">
         <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 471 289.85"
-            class="w-7 h-7 fill-current"
+            class="w-5 h-5 sm:w-7 sm:h-7 fill-current"
         >
           <path d="M437,289.85H34a34,34,0,0,1-34-34V34A34,34,0,0,1,34,0H437a34,34,0,0,1,34,34V255.88A34,34,0,0,1,437,289.85ZM34,22.64A11.34,11.34,0,0,0,22.64,34V255.88A11.34,11.34,0,0,0,34,267.2H437a11.34,11.34,0,0,0,11.33-11.32V34A11.34,11.34,0,0,0,437,22.64Z"/>
           <path d="M67.93,221.91v-154h45.29l45.29,56.61L203.8,67.93h45.29v154H203.8V133.6l-45.29,56.61L113.22,133.6v88.31Zm283.06,0-67.94-74.72h45.29V67.93h45.29v79.26h45.29Z"/>
         </svg>
 
-        <h1 class="text-lg font-semibold">
+        <span class="hidden sm:block text-lg font-semibold">
           Markdown
-        </h1>
+        </span>
       </div>
     </div>
 
@@ -628,27 +628,43 @@ onUnmounted(() => {
 .toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
-  padding: 0.5rem;
+  gap: 0.125rem;
+  padding: 0.375rem;
   background-color: rgb(51 65 85);
   border-bottom: 1px solid rgb(71 85 105);
   align-items: center;
+}
+
+@media (min-width: 640px) {
+  .toolbar {
+    gap: 0.25rem;
+    padding: 0.5rem;
+  }
 }
 
 .toolbar-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 32px;
-  height: 32px;
-  padding: 0.375rem;
+  min-width: 28px;
+  height: 28px;
+  padding: 0.25rem;
   background-color: transparent;
   color: rgb(203 213 225);
   border: none;
   border-radius: 0.25rem;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   transition: all 0.15s;
+}
+
+@media (min-width: 640px) {
+  .toolbar-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0.375rem;
+    font-size: 0.875rem;
+  }
 }
 
 .toolbar-btn:hover {
@@ -662,8 +678,15 @@ onUnmounted(() => {
 }
 
 .toolbar-btn .icon {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
+}
+
+@media (min-width: 640px) {
+  .toolbar-btn .icon {
+    width: 18px;
+    height: 18px;
+  }
 }
 
 .toolbar-btn code {
@@ -686,10 +709,17 @@ onUnmounted(() => {
 }
 
 .divider {
+  display: none;
   width: 1px;
   height: 24px;
   background-color: rgb(71 85 105);
   margin: 0 0.25rem;
+}
+
+@media (min-width: 640px) {
+  .divider {
+    display: block;
+  }
 }
 
 .heading-dropdown {

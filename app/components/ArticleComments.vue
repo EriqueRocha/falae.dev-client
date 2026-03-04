@@ -253,37 +253,38 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="mt-8 pt-8 border-t border-slate-800">
-    <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <section class="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-slate-800">
+    <h2 class="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6 flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
       </svg>
       Comentarios
-      <span class="text-slate-500 text-base font-normal">({{ totalComments }})</span>
+      <span class="text-slate-500 text-sm sm:text-base font-normal">({{ totalComments }})</span>
     </h2>
 
-    <div v-if="isAuthenticated" class="mb-8">
+    <div v-if="isAuthenticated" class="mb-6 sm:mb-8">
       <MarkdownEditor
         v-model="newComment"
         placeholder="Escreva um comentário em Markdown..."
         :rows="4"
       />
 
-      <div class="mt-3">
+      <div class="mt-2 sm:mt-3">
         <button
           v-if="!showTagInput"
           @click="showTagInput = true"
-          class="text-sm text-slate-400 hover:text-slate-300 flex items-center gap-1 transition-colors"
+          class="text-xs sm:text-sm text-slate-400 hover:text-slate-300 flex items-center gap-1 transition-colors"
         >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
           </svg>
-          Adicionar tags para encontrarem seu comentário
+          <span class="hidden sm:inline">Adicionar tags para encontrarem seu comentário</span>
+          <span class="sm:hidden">Adicionar tags</span>
         </button>
 
         <div v-else class="space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-sm text-slate-400">Tags</span>
+            <span class="text-xs sm:text-sm text-slate-400">Tags</span>
             <button
               @click="showTagInput = false; newCommentTags = []"
               class="text-xs text-slate-500 hover:text-slate-400"
@@ -295,11 +296,11 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div class="flex justify-end mt-3">
+      <div class="flex justify-end mt-2 sm:mt-3">
         <button
           @click="submitComment"
           :disabled="!newComment.trim() || sendingComment"
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white rounded-lg transition-colors"
+          class="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white rounded-lg transition-colors"
         >
           {{ sendingComment ? 'Enviando...' : 'Comentar' }}
         </button>
