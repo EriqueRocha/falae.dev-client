@@ -20,6 +20,7 @@ const deleteItemTitle = ref('')
 const resendingEmail = ref(false)
 const resendSuccess = ref(false)
 const resendError = ref('')
+const bioExpanded = ref(false)
 
 const showEmailNotVerifiedAlert = computed(() => {
   return isOwnProfile.value && profile.value && !profile.value.emailVerified
@@ -505,43 +506,43 @@ onUnmounted(() => {
       </div>
 
       <aside class="lg:w-72 flex-shrink-0">
-        <div class="bg-slate-900 rounded-xl p-6 border border-slate-800 lg:sticky lg:top-6">
-          <div class="flex flex-col items-center text-center mb-6">
+        <div class="bg-slate-900 rounded-xl p-4 sm:p-6 border border-slate-800 lg:sticky lg:top-6">
+          <div class="flex flex-col items-center text-center mb-4 sm:mb-6">
             <img
               v-if="profile.profileImageUrl"
               :src="profile.profileImageUrl"
               :alt="profile.name"
-              class="w-32 h-32 rounded-full object-cover mb-4 ring-4 ring-slate-800"
+              class="w-20 h-20 sm:w-32 sm:h-32 rounded-full object-cover mb-3 sm:mb-4 ring-2 sm:ring-4 ring-slate-800"
             />
             <div
               v-else
-              class="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-4 ring-4 ring-slate-800"
+              class="w-20 h-20 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-3 sm:mb-4 ring-2 sm:ring-4 ring-slate-800"
             >
-              <span class="text-4xl font-bold text-white">
+              <span class="text-2xl sm:text-4xl font-bold text-white">
                 {{ profile.name.charAt(0).toUpperCase() }}
               </span>
             </div>
-            <h1 class="text-xl font-bold text-white">{{ profile.name }}</h1>
-            <p class="text-slate-400">@{{ profile.userName }}</p>
-            <p v-if="profile.title" class="text-blue-400 text-sm mt-1">{{ profile.title }}</p>
+            <h1 class="text-lg sm:text-xl font-bold text-white">{{ profile.name }}</h1>
+            <p class="text-sm sm:text-base text-slate-400">@{{ profile.userName }}</p>
+            <p v-if="profile.title" class="text-blue-400 text-xs sm:text-sm mt-1">{{ profile.title }}</p>
           </div>
 
-          <div class="grid grid-cols-2 gap-4 mb-6">
+          <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div class="text-center">
-              <p class="text-2xl font-bold text-white">{{ profile.articleCount }}</p>
-              <p class="text-slate-400 text-sm">Artigos</p>
+              <p class="text-xl sm:text-2xl font-bold text-white">{{ profile.articleCount }}</p>
+              <p class="text-slate-400 text-xs sm:text-sm">Artigos</p>
             </div>
             <div class="text-center">
-              <p class="text-2xl font-bold text-white">{{ profile.topicCount }}</p>
-              <p class="text-slate-400 text-sm">Topicos</p>
+              <p class="text-xl sm:text-2xl font-bold text-white">{{ profile.topicCount }}</p>
+              <p class="text-slate-400 text-xs sm:text-sm">Topicos</p>
             </div>
             <div class="text-center">
-              <p class="text-2xl font-bold text-white">{{ profile.commentCount }}</p>
-              <p class="text-slate-400 text-sm">Comentarios</p>
+              <p class="text-xl sm:text-2xl font-bold text-white">{{ profile.commentCount }}</p>
+              <p class="text-slate-400 text-xs sm:text-sm">Comentarios</p>
             </div>
             <div class="text-center">
-              <p class="text-2xl font-bold text-yellow-400">{{ profile.bugCoins }}</p>
-              <p class="text-slate-400 text-sm">BugCoins</p>
+              <p class="text-xl sm:text-2xl font-bold text-yellow-400">{{ profile.bugCoins }}</p>
+              <p class="text-slate-400 text-xs sm:text-sm">BugCoins</p>
             </div>
           </div>
 
@@ -551,7 +552,7 @@ onUnmounted(() => {
             target="_blank"
             class="flex items-center justify-center gap-2 text-slate-400 hover:text-white transition-colors"
           >
-            <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
+            <svg class="w-8 h-8 sm:w-10 sm:h-10" fill="currentColor" viewBox="0 0 24 24">
               <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
             </svg>
           </a>
@@ -601,8 +602,28 @@ onUnmounted(() => {
 
       <main class="flex-1">
         <section v-if="profile.bio" class="mb-8">
-          <h2 class="text-xl font-bold text-white mb-4">Sobre</h2>
-          <p class="text-slate-400 leading-relaxed">{{ profile.bio }}</p>
+          <h2 class="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-4">Sobre</h2>
+          <p
+            class="text-slate-400 leading-relaxed text-sm sm:text-base"
+            :class="{ 'line-clamp-2 sm:line-clamp-none': !bioExpanded }"
+          >
+            {{ profile.bio }}
+          </p>
+          <button
+            @click="bioExpanded = !bioExpanded"
+            class="sm:hidden flex items-center gap-1 text-blue-400 text-sm mt-2"
+          >
+            <span>{{ bioExpanded ? 'Ver menos' : 'Ver mais' }}</span>
+            <svg
+              class="w-4 h-4 transition-transform"
+              :class="{ 'rotate-180': bioExpanded }"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
         </section>
 
         <section>

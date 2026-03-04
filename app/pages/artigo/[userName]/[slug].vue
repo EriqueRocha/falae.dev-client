@@ -212,19 +212,19 @@ watch(articleContent, async () => {
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto px-6 py-8">
+  <div class="max-w-7xl mx-auto px-0 sm:px-6 py-0 sm:py-8">
     <div v-if="loading" class="flex justify-center py-20">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
     </div>
 
-    <div v-else-if="error" class="text-center py-20">
+    <div v-else-if="error" class="text-center py-20 px-4">
       <p class="text-red-500 text-lg mb-4">{{ error }}</p>
       <NuxtLink to="/" class="text-blue-400 hover:text-blue-300">
         Voltar para o inicio
       </NuxtLink>
     </div>
 
-    <article v-else-if="article" class="bg-slate-900 rounded-xl overflow-hidden border border-slate-800">
+    <article v-else-if="article" class="bg-slate-900 sm:rounded-xl overflow-hidden sm:border border-slate-800">
       <div v-if="article.coverImage" class="w-full h-64 md:h-80">
         <img
           :src="article.coverImage"
@@ -233,7 +233,7 @@ watch(articleContent, async () => {
         />
       </div>
 
-      <div class="p-6 md:p-8">
+      <div class="p-4 sm:p-6 md:p-8">
         <header class="mb-8">
           <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">
             {{ article.title }}
@@ -285,27 +285,27 @@ watch(articleContent, async () => {
             </a>
           </div>
 
-          <div v-if="article.tags && article.tags.length > 0" class="flex flex-wrap gap-2 mt-4">
+          <div v-if="article.tags && article.tags.length > 0" class="flex flex-wrap gap-1.5 sm:gap-2 mt-3 sm:mt-4">
             <NuxtLink
               v-for="tag in article.tags"
               :key="tag"
               :to="`/busca?tag=${tag}`"
-              class="px-3 py-1 bg-blue-600/20 text-blue-400 rounded-full text-sm hover:bg-blue-600/30 transition-colors"
+              class="px-2 py-0.5 sm:px-3 sm:py-1 bg-blue-600/20 text-blue-400 rounded-full text-xs sm:text-sm hover:bg-blue-600/30 transition-colors"
             >
               #{{ tag }}
             </NuxtLink>
           </div>
         </header>
 
-        <div class="flex items-center gap-4 mb-8 pb-8 border-b border-slate-800">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-4 mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-slate-800">
           <button
             @click="toggleLike"
-            class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+            class="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-colors text-sm sm:text-base"
             :class="isLiked
               ? 'bg-green-600/20 text-green-400'
               : 'bg-slate-800 text-slate-400 hover:text-green-400'"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
             </svg>
             {{ likesCount }}
@@ -313,12 +313,12 @@ watch(articleContent, async () => {
 
           <button
             @click="toggleDislike"
-            class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+            class="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-colors text-sm sm:text-base"
             :class="isDisliked
               ? 'bg-red-600/20 text-red-400'
               : 'bg-slate-800 text-slate-400 hover:text-red-400'"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
             </svg>
             {{ dislikesCount }}
@@ -326,12 +326,12 @@ watch(articleContent, async () => {
 
           <button
             @click="toggleSave"
-            class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+            class="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-colors text-sm sm:text-base"
             :class="isSaved
               ? 'bg-yellow-600/20 text-yellow-400'
               : 'bg-slate-800 text-slate-400 hover:text-yellow-400'"
           >
-            <svg class="w-5 h-5" :fill="isSaved ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" :fill="isSaved ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
             </svg>
             {{ savesCount }}
@@ -340,9 +340,9 @@ watch(articleContent, async () => {
           <NuxtLink
             v-if="isOwner"
             :to="`/artigo/editar/${article.id}`"
-            class="ml-auto flex items-center gap-2 px-4 py-2 bg-slate-800 text-slate-400 rounded-lg hover:text-white transition-colors"
+            class="sm:ml-auto flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-4 sm:py-2 bg-slate-800 text-slate-400 rounded-lg hover:text-white transition-colors text-sm sm:text-base"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
             Editar

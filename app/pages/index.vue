@@ -167,21 +167,21 @@ onMounted(async () => {
 
 <template>
   <div class="max-w-7xl mx-auto px-6 py-8">
-    <div class="flex gap-4 mb-8">
+    <div class="flex gap-2 sm:gap-4 mb-8">
       <NuxtLink
         to="/topico/novo"
-        class="flex items-center gap-2 px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 hover:bg-slate-700 hover:border-blue-500 transition-all duration-200"
+        class="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-5 sm:py-2.5 text-sm sm:text-base bg-slate-800 border border-slate-700 rounded-lg text-slate-200 hover:bg-slate-700 hover:border-blue-500 transition-all duration-200"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         Criar Topico
       </NuxtLink>
       <NuxtLink
         to="/artigo/novo"
-        class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 rounded-lg text-white hover:bg-blue-500 transition-all duration-200"
+        class="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-5 sm:py-2.5 text-sm sm:text-base bg-blue-600 rounded-lg text-white hover:bg-blue-500 transition-all duration-200"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
         </svg>
         Criar Artigo
@@ -189,12 +189,12 @@ onMounted(async () => {
     </div>
 
     <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
-      <div class="flex gap-2">
+      <div class="flex flex-wrap gap-2">
         <button
           v-for="option in filterOptions"
           :key="option.value ?? 'all'"
           @click="changeFilter(option.value)"
-          class="px-4 py-2 rounded-lg font-medium transition-colors"
+          class="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg font-medium transition-colors"
           :class="currentFilter === option.value
             ? 'bg-blue-600 text-white'
             : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'"
