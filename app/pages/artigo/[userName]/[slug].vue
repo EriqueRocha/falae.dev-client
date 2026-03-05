@@ -411,6 +411,42 @@ watch(articleContent, async () => {
   @apply mb-2;
 }
 
+/* Task List / Checklist - TipTap format */
+.article-content :deep(ul[data-type="taskList"]) {
+  @apply list-none pl-0;
+}
+
+.article-content :deep(li[data-type="taskItem"]) {
+  @apply flex items-start gap-2 mb-2;
+}
+
+.article-content :deep(li[data-type="taskItem"]) > label {
+  @apply flex items-center gap-2 cursor-pointer;
+}
+
+.article-content :deep(li[data-type="taskItem"]) input[type="checkbox"] {
+  @apply w-4 h-4 mt-1 rounded border-slate-600 bg-slate-800 text-blue-500 cursor-pointer;
+  accent-color: #3b82f6;
+}
+
+.article-content :deep(li[data-type="taskItem"][data-checked="true"]) > div {
+  @apply text-slate-500 line-through;
+}
+
+/* Task List / Checklist - GFM format (li with checkbox) */
+.article-content :deep(li:has(> input[type="checkbox"])) {
+  @apply list-none flex items-start gap-2;
+}
+
+.article-content :deep(li > input[type="checkbox"]) {
+  @apply w-4 h-4 mt-1 rounded border-slate-600 bg-slate-800 flex-shrink-0;
+  accent-color: #3b82f6;
+}
+
+.article-content :deep(ul:has(> li > input[type="checkbox"])) {
+  @apply list-none pl-2;
+}
+
 .article-content :deep(blockquote) {
   @apply border-l-4 border-blue-500 pl-4 italic text-slate-400 my-4 bg-slate-800/50 py-2 rounded-r;
 }
@@ -431,13 +467,33 @@ watch(articleContent, async () => {
   @apply rounded-lg my-4 max-w-full h-auto;
 }
 
+/* Video embeds (iframe, video, embed, object) */
+.article-content :deep(iframe),
+.article-content :deep(video),
+.article-content :deep(embed),
+.article-content :deep(object) {
+  @apply my-4 rounded-lg;
+  max-width: 100%;
+  height: auto;
+}
+
+.article-content :deep(iframe) {
+  aspect-ratio: 16 / 9;
+}
+
 .article-content :deep(table) {
-  @apply w-full border-collapse my-4;
+  @apply border-collapse my-4;
+  display: block;
+  overflow-x: auto;
 }
 
 .article-content :deep(th),
 .article-content :deep(td) {
   @apply border border-slate-700 px-4 py-2 text-left text-slate-300;
+  min-width: 120px;
+  max-width: 300px;
+  white-space: normal;
+  word-wrap: break-word;
 }
 
 .article-content :deep(th) {
