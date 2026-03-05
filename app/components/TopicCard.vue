@@ -110,7 +110,7 @@ onMounted(() => {
 
     <div
       ref="contentRef"
-      class="topic-card-content text-slate-400 text-sm flex-1 min-h-0 overflow-hidden line-clamp-8"
+      class="topic-card-content text-slate-400 text-sm flex-1 min-h-0 overflow-hidden line-clamp-6"
       v-html="renderedContent"
     />
 
