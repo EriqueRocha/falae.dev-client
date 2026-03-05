@@ -110,7 +110,7 @@ onMounted(() => {
 
     <div
       ref="contentRef"
-      class="topic-card-content text-slate-400 text-sm flex-1 min-h-0 overflow-hidden"
+      class="topic-card-content text-slate-400 text-sm flex-1 min-h-0 overflow-hidden max-h-[200px]"
       :class="{ 'line-clamp-3': !hasRichContent }"
       v-html="renderedContent"
     />
@@ -215,6 +215,16 @@ onMounted(() => {
   border-radius: 0.375rem;
   margin: 0.25rem 0;
   object-fit: cover;
+}
+
+.topic-card-content :deep(iframe),
+.topic-card-content :deep(video),
+.topic-card-content :deep(embed),
+.topic-card-content :deep(object) {
+  max-width: 100%;
+  max-height: 150px;
+  border-radius: 0.375rem;
+  margin: 0.25rem 0;
 }
 
 .topic-card-content :deep(a > img) {
