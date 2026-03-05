@@ -462,42 +462,25 @@ useHead({
             <span class="text-sm text-slate-500">({{ topicResults.length }})</span>
           </div>
           <div class="space-y-3">
-            <button
+            <NuxtLink
               v-for="result in topicResults"
               :key="result.id"
-              @click="goToTopic(result.authorUserName, result.slug)"
-              class="w-full text-left bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 rounded-xl p-4 transition-all group"
+              :to="`/topico/${result.authorUserName}/${result.slug}`"
+              class="block"
             >
-              <h3 class="text-white font-medium group-hover:text-purple-400 transition-colors line-clamp-2">
-                {{ result.title }}
-              </h3>
-              <p v-if="result.topicContent" class="text-slate-400 text-sm mt-2 line-clamp-2">
-                {{ result.topicContent }}
-              </p>
-              <div class="flex items-center gap-4 mt-3 text-xs text-slate-500">
-                <span class="flex items-center gap-1">
-                  <img
-                    v-if="result.authorProfileImage"
-                    :src="result.authorProfileImage"
-                    class="w-4 h-4 rounded-full"
-                  />
-                  {{ result.authorName }}
-                </span>
-                <span v-if="result.creationDate">{{ formatDate(result.creationDate) }}</span>
-                <span v-if="result.likesCount" class="flex items-center gap-1">
-                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-                  </svg>
-                  {{ result.likesCount }}
-                </span>
-                <span v-if="result.commentsCount" class="flex items-center gap-1">
-                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd" />
-                  </svg>
-                  {{ result.commentsCount }}
-                </span>
-              </div>
-            </button>
+              <TopicCard
+                :topic="{
+                  id: result.id,
+                  title: result.title,
+                  excerpt: result.topicContent || '',
+                  tags: result.tags || [],
+                  author: { name: result.authorName, userName: result.authorUserName, avatar: result.authorProfileImage || undefined },
+                  date: result.creationDate || '',
+                  likes: result.likesCount,
+                  comments: result.commentsCount
+                }"
+              />
+            </NuxtLink>
           </div>
           <button
             v-if="topicHasMore"
