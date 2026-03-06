@@ -1181,10 +1181,17 @@ defineExpose({
 }
 
 .divider {
+  display: none;
   width: 1px;
   height: 24px;
   background-color: rgb(71 85 105);
   margin: 0 0.25rem;
+}
+
+@media (min-width: 640px) {
+  .divider {
+    display: block;
+  }
 }
 
 .code-block-group {

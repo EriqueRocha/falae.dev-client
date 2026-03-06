@@ -158,8 +158,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto px-6 py-8">
-    <div class="bg-slate-900 rounded-xl p-8 border border-slate-800">
+  <div class="max-w-7xl mx-auto px-0 sm:px-6 py-0 sm:py-8">
+    <div class="bg-slate-900 sm:rounded-xl p-4 sm:p-6 md:p-8 sm:border border-slate-800">
       <div v-if="loading" class="flex items-center justify-center py-12">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
         <span class="ml-3 text-slate-400">Carregando topico...</span>
@@ -173,26 +173,26 @@ onMounted(() => {
       </div>
 
       <template v-else>
-        <h1 class="text-2xl font-bold text-white mb-8">Editar Topico</h1>
+        <h1 class="text-xl sm:text-2xl font-bold text-white mb-6 sm:mb-8">Editar Topico</h1>
 
-        <form @submit.prevent="handleSubmit" class="space-y-6">
+        <form @submit.prevent="handleSubmit" class="space-y-4 sm:space-y-6">
           <div>
             <label class="block text-slate-300 text-sm font-medium mb-2">Titulo*</label>
             <input
               v-model="title"
               type="text"
               placeholder="Digite o titulo do topico"
-              class="w-full bg-slate-800 text-white placeholder-slate-500 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full bg-slate-800 text-white placeholder-slate-500 rounded-lg px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div>
             <label class="block text-slate-300 text-sm font-medium mb-2">Tags*</label>
-            <div class="flex flex-wrap gap-2 mb-2">
+            <div class="flex flex-wrap gap-1.5 sm:gap-2 mb-2">
               <span
                 v-for="(tag, index) in tags"
                 :key="index"
-                class="inline-flex items-center gap-1 bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full text-sm"
+                class="inline-flex items-center gap-1 bg-blue-600/20 text-blue-400 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm"
               >
                 #{{ tag }}
                 <button
@@ -200,25 +200,25 @@ onMounted(() => {
                   @click="removeTag(index)"
                   class="hover:text-blue-200 transition-colors"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </span>
             </div>
-            <div v-if="tags.length < MAX_TAGS" class="flex gap-2">
+            <div v-if="tags.length < MAX_TAGS" class="flex flex-col sm:flex-row gap-2">
               <input
                 :value="tagInput"
                 type="text"
-                placeholder="Adicione e pressione Enter (apenas letras e números)"
+                placeholder="Adicione e pressione Enter"
                 @input="onTagInput"
                 @keydown="handleTagKeydown"
-                class="flex-1 bg-slate-800 text-white placeholder-slate-500 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="flex-1 bg-slate-800 text-white placeholder-slate-500 rounded-lg px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
                 type="button"
                 @click="addTag"
-                class="px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                class="px-4 py-2.5 sm:py-3 bg-slate-700 hover:bg-slate-600 text-white text-sm sm:text-base rounded-lg transition-colors"
               >
                 Adicionar
               </button>
@@ -237,21 +237,21 @@ onMounted(() => {
             />
           </div>
 
-          <div v-if="error" class="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-lg text-sm">
+          <div v-if="error" class="bg-red-500/10 border border-red-500 text-red-500 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm">
             {{ error }}
           </div>
 
-          <div class="flex gap-4 pt-4">
+          <div class="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 pt-4">
             <NuxtLink
               :to="topic ? `/topico/${topic.authorUserName}/${topic.slug}` : '/'"
-              class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+              class="px-4 sm:px-6 py-2.5 sm:py-3 bg-slate-700 hover:bg-slate-600 text-white text-sm sm:text-base text-center rounded-lg transition-colors"
             >
               Cancelar
             </NuxtLink>
             <button
               type="submit"
               :disabled="isSaving"
-              class="flex-1 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white font-medium py-3 rounded-lg transition-colors"
+              class="flex-1 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white font-medium py-2.5 sm:py-3 text-sm sm:text-base rounded-lg transition-colors"
             >
               {{ isSaving ? 'Salvando...' : 'Salvar Alteracoes' }}
             </button>

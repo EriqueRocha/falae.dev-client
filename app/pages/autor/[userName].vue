@@ -548,7 +548,7 @@ onUnmounted(() => {
 
           <a
             v-if="profile.gitHub"
-            :href="`https://github.com/${profile.gitHub}`"
+            :href="profile.gitHub.startsWith('http') ? profile.gitHub : `https://github.com/${profile.gitHub}`"
             target="_blank"
             class="flex items-center justify-center gap-2 text-slate-400 hover:text-white transition-colors"
           >
