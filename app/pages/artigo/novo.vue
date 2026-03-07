@@ -275,6 +275,10 @@ onBeforeUnmount(() => {
 
         <div>
           <label class="block text-slate-300 text-sm font-medium mb-2">Conteúdo*</label>
+          <p class="text-xs text-slate-500 mb-3">
+            O seletor HTML/Markdown define as funções disponíveis no editor e o formato do arquivo final.
+            O modo Markdown possui funções compatíveis com a sintaxe MD, enquanto o HTML oferece mais recursos de formatação.
+          </p>
           <TiptapEditor
             ref="editorRef"
             v-model="editorContent"
