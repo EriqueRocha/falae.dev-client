@@ -40,6 +40,7 @@ const emit = defineEmits<{
 }>()
 
 const editorMode = ref<'html' | 'markdown'>(props.markdownOnly ? 'markdown' : (props.initialMode || 'html'))
+const editorContainerRef = ref<HTMLElement | null>(null)
 const currentColor = ref('#ffffff')
 const showHeadingMenu = ref(false)
 const showTableMenu = ref(false)
@@ -344,11 +345,14 @@ const handleClickOutside = (event: MouseEvent) => {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  // Listener para edição de diagramas Mermaid
+  editorContainerRef.value?.addEventListener('mermaid-edit', handleMermaidEdit as EventListener)
 })
 
 onBeforeUnmount(() => {
   editor.value?.destroy()
   document.removeEventListener('click', handleClickOutside)
+  editorContainerRef.value?.removeEventListener('mermaid-edit', handleMermaidEdit as EventListener)
 })
 
 watch(() => props.modelValue, (value) => {
@@ -589,12 +593,39 @@ const handleLatexSubmit = (latex: string) => {
   showLatexModal.value = false
 }
 
+// Estado para edição de Mermaid
+const mermaidEditContent = ref('')
+const mermaidUpdateFn = ref<((content: string) => void) | null>(null)
+const isMermaidEditMode = computed(() => !!mermaidUpdateFn.value)
+
 const openMermaidModal = () => {
+  mermaidEditContent.value = ''
+  mermaidUpdateFn.value = null
+  showMermaidModal.value = true
+}
+
+const handleMermaidEdit = (event: CustomEvent<{ content: string; updateContent: (content: string) => void }>) => {
+  mermaidEditContent.value = event.detail.content
+  mermaidUpdateFn.value = event.detail.updateContent
   showMermaidModal.value = true
 }
 
 const handleMermaidSubmit = (mermaidCode: string) => {
-  editor.value?.chain().focus().insertMermaid(mermaidCode).run()
+  if (mermaidUpdateFn.value) {
+    // Modo edição: atualiza o diagrama existente
+    mermaidUpdateFn.value(mermaidCode)
+    mermaidUpdateFn.value = null
+  } else {
+    // Modo inserção: insere novo diagrama
+    editor.value?.chain().focus().insertMermaid(mermaidCode).run()
+  }
+  mermaidEditContent.value = ''
+  showMermaidModal.value = false
+}
+
+const handleMermaidClose = () => {
+  mermaidEditContent.value = ''
+  mermaidUpdateFn.value = null
   showMermaidModal.value = false
 }
 
@@ -629,7 +660,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="tiptap-editor">
+  <div ref="editorContainerRef" class="tiptap-editor">
     <div v-if="editor" class="toolbar">
       <div v-if="!markdownOnly" class="mode-toggle">
         <button
@@ -1042,7 +1073,9 @@ defineExpose({
 
     <MermaidInputModal
       :is-open="showMermaidModal"
-      @close="showMermaidModal = false"
+      :initial-content="mermaidEditContent"
+      :is-edit-mode="isMermaidEditMode"
+      @close="handleMermaidClose"
       @submit="handleMermaidSubmit"
     />
 

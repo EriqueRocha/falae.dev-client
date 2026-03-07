@@ -3,6 +3,8 @@ import mermaid from 'mermaid'
 
 const props = defineProps<{
   isOpen: boolean
+  initialContent?: string
+  isEditMode?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -125,14 +127,18 @@ watch(() => props.isOpen, async (isOpen) => {
       isInitialized.value = true
     }
 
-    mermaidInput.value = ''
+    // Carrega conteúdo inicial se estiver em modo de edição
+    mermaidInput.value = props.initialContent || ''
     hasError.value = false
     errorMessage.value = ''
 
     await nextTick()
     inputRef.value?.focus()
 
-    if (previewRef.value) {
+    // Renderiza o preview se tiver conteúdo inicial
+    if (props.initialContent) {
+      renderPreview()
+    } else if (previewRef.value) {
       previewRef.value.innerHTML = '<span class="placeholder">Preview do diagrama</span>'
     }
   }
@@ -184,7 +190,7 @@ onBeforeUnmount(() => {
       >
         <div class="modal-content">
           <div class="modal-header">
-            <h3 class="modal-title">Inserir Diagrama Mermaid</h3>
+            <h3 class="modal-title">{{ isEditMode ? 'Editar' : 'Inserir' }} Diagrama Mermaid</h3>
             <button
               type="button"
               class="close-btn"
@@ -256,7 +262,7 @@ onBeforeUnmount(() => {
                 :disabled="!mermaidInput.trim() || hasError"
                 @click="handleSubmit"
               >
-                Inserir Diagrama
+                {{ isEditMode ? 'Salvar Alterações' : 'Inserir Diagrama' }}
               </button>
             </div>
           </div>
