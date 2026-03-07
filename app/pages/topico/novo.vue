@@ -3,6 +3,11 @@ const { isAuthenticated } = useAuth()
 const config = useRuntimeConfig()
 const apiBase = config.public.apiBase
 
+const editorRef = shallowRef<{
+  getContent: () => string
+  isEmpty: () => boolean
+} | null>(null)
+
 const title = ref('')
 const topicContent = ref('')
 const tags = ref<string[]>([])
@@ -64,12 +69,15 @@ const handleSubmit = async () => {
     return
   }
 
-  if (!topicContent.value.trim()) {
+  if (!topicContent.value.trim() || editorRef.value?.isEmpty()) {
     error.value = 'O conteudo do topico e obrigatorio'
     return
   }
 
-  if (topicContent.value.trim().length < MIN_CONTENT_LENGTH) {
+  const contentToPublish = editorRef.value?.getContent() ?? topicContent.value
+  const textContent = contentToPublish.replace(/<[^>]*>/g, '').replace(/[#*_~`>\-\[\]()!]/g, '').trim()
+
+  if (textContent.length < MIN_CONTENT_LENGTH) {
     error.value = `O conteúdo do tópico deve ter no mínimo ${MIN_CONTENT_LENGTH} caracteres.`
     return
   }
@@ -77,14 +85,14 @@ const handleSubmit = async () => {
   isPublishing.value = true
 
   try {
-    const response = await $fetch<{ id: string; title: string }>(
+    await $fetch<{ id: string; title: string }>(
       `${apiBase}/api/topic/saveNew`,
       {
         method: 'POST',
         credentials: 'include',
         body: {
           title: title.value,
-          topicContent: topicContent.value,
+          topicContent: contentToPublish,
           tags: tags.value.length > 0 ? tags.value : null
         }
       }
@@ -163,10 +171,14 @@ const handleSubmit = async () => {
 
         <div>
           <label class="block text-slate-300 text-sm font-medium mb-2">Conteudo*</label>
-          <MarkdownEditor
+          <p class="text-xs text-slate-500 mb-3">
+            Escreva normalmente usando o editor. O conteúdo final será convertido em Markdown.
+          </p>
+          <TiptapEditor
+            ref="editorRef"
             v-model="topicContent"
-            placeholder="Escreva o conteúdo do seu tópico em Markdown..."
-            :rows="10"
+            placeholder="Escreva o conteúdo do seu tópico..."
+            :markdown-only="true"
           />
         </div>
 

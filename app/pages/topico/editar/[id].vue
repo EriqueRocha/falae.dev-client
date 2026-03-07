@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { markdownToHtml } from '~/utils/markdownToHtml'
+
 interface Topic {
   id: string
   authorId: string
@@ -19,6 +21,11 @@ const route = useRoute()
 const config = useRuntimeConfig()
 const apiBase = config.public.apiBase
 const { isAuthenticated, user } = useAuth()
+
+const editorRef = shallowRef<{
+  getContent: () => string
+  isEmpty: () => boolean
+} | null>(null)
 
 const title = ref('')
 const topicContent = ref('')
@@ -56,7 +63,8 @@ const fetchTopic = async () => {
     topic.value = data
 
     title.value = data.title
-    topicContent.value = data.topicContent
+    // Converte markdown para HTML para o TiptapEditor
+    topicContent.value = markdownToHtml(data.topicContent)
     tags.value = data.tags || []
   } catch (e: any) {
     if (e?.statusCode === 404) {
@@ -119,12 +127,15 @@ const handleSubmit = async () => {
     return
   }
 
-  if (!topicContent.value.trim()) {
+  if (!topicContent.value.trim() || editorRef.value?.isEmpty()) {
     error.value = 'O conteudo do topico e obrigatorio'
     return
   }
 
-  if (topicContent.value.trim().length < MIN_CONTENT_LENGTH) {
+  const contentToSave = editorRef.value?.getContent() ?? topicContent.value
+  const textContent = contentToSave.replace(/<[^>]*>/g, '').replace(/[#*_~`>\-\[\]()!]/g, '').trim()
+
+  if (textContent.length < MIN_CONTENT_LENGTH) {
     error.value = `O conteúdo do tópico deve ter no mínimo ${MIN_CONTENT_LENGTH} caracteres.`
     return
   }
@@ -137,7 +148,7 @@ const handleSubmit = async () => {
       body: {
         topicId: topicId.value,
         title: title.value,
-        topicContent: topicContent.value,
+        topicContent: contentToSave,
         tags: tags.value.length > 0 ? tags.value : null
       },
       credentials: 'include'
@@ -230,10 +241,14 @@ onMounted(() => {
 
           <div>
             <label class="block text-slate-300 text-sm font-medium mb-2">Conteudo*</label>
-            <MarkdownEditor
+            <p class="text-xs text-slate-500 mb-3">
+              Escreva normalmente usando o editor. O conteúdo final será convertido em Markdown.
+            </p>
+            <TiptapEditor
+              ref="editorRef"
               v-model="topicContent"
-              placeholder="Escreva o conteudo do seu topico em Markdown..."
-              :rows="10"
+              placeholder="Escreva o conteúdo do seu tópico..."
+              :markdown-only="true"
             />
           </div>
 

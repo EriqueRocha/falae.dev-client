@@ -31,6 +31,7 @@ const props = defineProps<{
   placeholder?: string
   onImageUpload?: (file: File) => string // Retorna o URL (Object URL ou path)
   initialMode?: 'html' | 'markdown'
+  markdownOnly?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -38,7 +39,7 @@ const emit = defineEmits<{
   'update:editorMode': [mode: 'html' | 'markdown']
 }>()
 
-const editorMode = ref<'html' | 'markdown'>(props.initialMode || 'html')
+const editorMode = ref<'html' | 'markdown'>(props.markdownOnly ? 'markdown' : (props.initialMode || 'html'))
 const currentColor = ref('#ffffff')
 const showHeadingMenu = ref(false)
 const showTableMenu = ref(false)
@@ -630,7 +631,7 @@ defineExpose({
 <template>
   <div class="tiptap-editor">
     <div v-if="editor" class="toolbar">
-      <div class="mode-toggle">
+      <div v-if="!markdownOnly" class="mode-toggle">
         <button
           type="button"
           class="toggle-btn"
@@ -648,8 +649,19 @@ defineExpose({
           MD
         </button>
       </div>
+      <div v-else class="markdown-indicator">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 471 289.85"
+          class="w-5 h-5 fill-current text-slate-400"
+        >
+          <path d="M437,289.85H34a34,34,0,0,1-34-34V34A34,34,0,0,1,34,0H437a34,34,0,0,1,34,34V255.88A34,34,0,0,1,437,289.85ZM34,22.64A11.34,11.34,0,0,0,22.64,34V255.88A11.34,11.34,0,0,0,34,267.2H437a11.34,11.34,0,0,0,11.33-11.32V34A11.34,11.34,0,0,0,437,22.64Z"/>
+          <path d="M67.93,221.91v-154h45.29l45.29,56.61L203.8,67.93h45.29v154H203.8V133.6l-45.29,56.61L113.22,133.6v88.31Zm283.06,0-67.94-74.72h45.29V67.93h45.29v79.26h45.29Z"/>
+        </svg>
+        <span class="text-slate-400 text-sm font-medium">Markdown</span>
+      </div>
 
-      <span class="divider" />
+      <span v-if="!markdownOnly" class="divider" />
 
       <div v-if="!isMarkdownMode" class="toolbar-group">
         <input
@@ -725,6 +737,7 @@ defineExpose({
         <img src="/icons/editor/italic.png" alt="Itálico" class="toolbar-icon" />
       </button>
       <button
+        v-if="!markdownOnly"
         type="button"
         class="toolbar-btn"
         @click="editor.chain().focus().toggleUnderline().run()"
@@ -1101,6 +1114,15 @@ defineExpose({
   background-color: rgb(30 41 59);
   border-radius: 0.375rem;
   padding: 2px;
+}
+
+.markdown-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  background-color: rgb(30 41 59);
+  border-radius: 0.375rem;
 }
 
 .toggle-btn {
