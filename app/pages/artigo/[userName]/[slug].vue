@@ -49,6 +49,7 @@ const likesCount = ref(0)
 const dislikesCount = ref(0)
 const savesCount = ref(0)
 const commentsCount = ref(0)
+const descriptionExpanded = ref(false)
 
 const userName = computed(() => route.params.userName as string)
 const slug = computed(() => route.params.slug as string)
@@ -239,9 +240,29 @@ watch(articleContent, async () => {
             {{ article.title }}
           </h1>
 
-          <p class="text-slate-400 text-lg mb-6">
-            {{ article.description }}
-          </p>
+          <div class="mb-6">
+            <p
+              class="text-slate-400 text-lg"
+              :class="{ 'line-clamp-2 sm:line-clamp-none': !descriptionExpanded }"
+            >
+              {{ article.description }}
+            </p>
+            <button
+              @click="descriptionExpanded = !descriptionExpanded"
+              class="sm:hidden flex items-center gap-1 text-blue-400 text-sm mt-2"
+            >
+              <span>{{ descriptionExpanded ? 'Ver menos' : 'Ver mais' }}</span>
+              <svg
+                class="w-4 h-4 transition-transform"
+                :class="{ 'rotate-180': descriptionExpanded }"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          </div>
 
           <div class="flex flex-wrap items-center gap-4 text-sm text-slate-400">
             <NuxtLink

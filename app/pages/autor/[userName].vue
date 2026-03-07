@@ -664,7 +664,7 @@ onUnmounted(() => {
                     v-if="isOwnProfile"
                     type="button"
                     @click.prevent.stop="openDeleteModal(article.id, 'artigo', article.title)"
-                    class="absolute top-3 right-3 z-10 p-2 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    class="absolute top-3 right-3 z-10 p-2 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                     title="Deletar artigo"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -699,7 +699,7 @@ onUnmounted(() => {
                     v-if="isOwnProfile"
                     type="button"
                     @click.prevent.stop="openDeleteModal(article.id, 'artigo', article.title)"
-                    class="absolute top-3 right-3 z-10 p-2 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    class="absolute top-3 right-3 z-10 p-2 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                     title="Deletar artigo"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -742,7 +742,7 @@ onUnmounted(() => {
                     v-if="isOwnProfile"
                     type="button"
                     @click.prevent.stop="openDeleteModal(topic.id, 'topico', topic.title)"
-                    class="absolute top-3 right-3 z-10 p-2 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    class="absolute top-3 right-3 z-10 p-2 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                     title="Deletar topico"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -774,7 +774,7 @@ onUnmounted(() => {
                     v-if="isOwnProfile"
                     type="button"
                     @click.prevent.stop="openDeleteModal(topic.id, 'topico', topic.title)"
-                    class="absolute top-3 right-3 z-10 p-2 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    class="absolute top-3 right-3 z-10 p-2 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                     title="Deletar topico"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -814,7 +814,7 @@ onUnmounted(() => {
                     v-if="isOwnProfile"
                     type="button"
                     @click.prevent.stop="openDeleteModal(comment.id, 'comentario', comment.content.substring(0, 50) + (comment.content.length > 50 ? '...' : ''))"
-                    class="absolute top-3 right-3 z-10 p-1.5 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    class="absolute top-3 right-3 z-10 p-1.5 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                     title="Deletar comentario"
                   >
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -846,7 +846,7 @@ onUnmounted(() => {
                     v-if="isOwnProfile"
                     type="button"
                     @click.prevent.stop="openDeleteModal(comment.id, 'comentario', comment.content.substring(0, 50) + (comment.content.length > 50 ? '...' : ''))"
-                    class="absolute top-3 right-3 z-10 p-1.5 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    class="absolute top-3 right-3 z-10 p-1.5 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                     title="Deletar comentario"
                   >
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
