@@ -127,7 +127,6 @@ watch(() => props.isOpen, async (isOpen) => {
       isInitialized.value = true
     }
 
-    // Carrega conteúdo inicial se estiver em modo de edição
     mermaidInput.value = props.initialContent || ''
     hasError.value = false
     errorMessage.value = ''
@@ -135,7 +134,6 @@ watch(() => props.isOpen, async (isOpen) => {
     await nextTick()
     inputRef.value?.focus()
 
-    // Renderiza o preview se tiver conteúdo inicial
     if (props.initialContent) {
       renderPreview()
     } else if (previewRef.value) {

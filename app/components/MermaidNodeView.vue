@@ -61,7 +61,6 @@ watch(() => props.node.attrs.content, async () => {
 })
 
 const handleEdit = () => {
-  // Dispara evento customizado que será capturado pelo TiptapEditor
   const event = new CustomEvent('mermaid-edit', {
     detail: {
       content: props.node.attrs.content,

@@ -46,7 +46,6 @@ const showHeadingMenu = ref(false)
 const showTableMenu = ref(false)
 const showImageMenu = ref(false)
 
-// Estados dos modais de URL
 const showLinkModal = ref(false)
 const showMarkdownLinkModal = ref(false)
 const showImageUrlModal = ref(false)
@@ -57,7 +56,6 @@ const showLanguageSelector = ref(false)
 
 const isMarkdownMode = computed(() => editorMode.value === 'markdown')
 
-// Recursos que existem apenas em HTML e não são suportados em Markdown
 interface IncompatibleFeature {
   id: string
   name: string
@@ -67,24 +65,19 @@ interface IncompatibleFeature {
 const showIncompatibleModal = ref(false)
 const incompatibleFeatures = ref<IncompatibleFeature[]>([])
 
-/**
- * Detecta recursos HTML-only presentes no conteúdo atual
- */
 const detectHtmlOnlyFeatures = (): IncompatibleFeature[] => {
   if (!editor.value) return []
 
   const html = editor.value.getHTML()
   const features: IncompatibleFeature[] = []
 
-  // Cor do texto (style="color:...")
-  // Extrai todas as cores e filtra as que não são brancas
   const colorRegex = /style="[^"]*color:\s*([^;"]+)/gi
   let colorMatch
   let nonWhiteColorCount = 0
 
   while ((colorMatch = colorRegex.exec(html)) !== null) {
     const colorValue = colorMatch[1].trim().toLowerCase()
-    // Ignora cores brancas (padrão)
+
     const isWhite = colorValue === '#ffffff' ||
                     colorValue === '#fff' ||
                     colorValue === 'white' ||
@@ -99,44 +92,36 @@ const detectHtmlOnlyFeatures = (): IncompatibleFeature[] => {
     features.push({ id: 'color', name: 'Cores de texto', count: nonWhiteColorCount })
   }
 
-  // Highlight/marcador (<mark>)
   const highlightMatches = html.match(/<mark[^>]*>/gi)
   if (highlightMatches && highlightMatches.length > 0) {
     features.push({ id: 'highlight', name: 'Texto destacado (marcador)', count: highlightMatches.length })
   }
 
-  // Subscrito (<sub>)
   const subMatches = html.match(/<sub>/gi)
   if (subMatches && subMatches.length > 0) {
     features.push({ id: 'subscript', name: 'Subscrito', count: subMatches.length })
   }
 
-  // Sobrescrito (<sup>)
   const supMatches = html.match(/<sup>/gi)
   if (supMatches && supMatches.length > 0) {
     features.push({ id: 'superscript', name: 'Sobrescrito', count: supMatches.length })
   }
 
-  // Alinhamento de texto (text-align: center/right)
   const alignMatches = html.match(/text-align:\s*(center|right)/gi)
   if (alignMatches && alignMatches.length > 0) {
     features.push({ id: 'alignment', name: 'Alinhamento de texto', count: alignMatches.length })
   }
 
-  // Task lists (<ul data-type="taskList">)
   const taskListMatches = html.match(/<ul[^>]*data-type="taskList"/gi)
   if (taskListMatches && taskListMatches.length > 0) {
     features.push({ id: 'taskList', name: 'Lista de tarefas', count: taskListMatches.length })
   }
 
-  // Células mescladas (colspan ou rowspan > 1)
   const mergedCellMatches = html.match(/(colspan|rowspan)=["']([2-9]|\d{2,})["']/gi)
   if (mergedCellMatches && mergedCellMatches.length > 0) {
     features.push({ id: 'mergedCells', name: 'Células mescladas em tabela', count: mergedCellMatches.length })
   }
 
-  // Cabeçalho vertical em tabela (th dentro de td's row - difícil detectar, simplificando)
-  // Verificar se há <th> que não está na primeira linha
   const hasVerticalHeader = /<tr>(?!<th).*<th/gi.test(html)
   if (hasVerticalHeader) {
     features.push({ id: 'verticalHeader', name: 'Cabeçalho vertical em tabela', count: 1 })
@@ -145,20 +130,15 @@ const detectHtmlOnlyFeatures = (): IncompatibleFeature[] => {
   return features
 }
 
-/**
- * Tenta trocar o modo do editor, verificando compatibilidade
- */
 const tryChangeMode = (newMode: 'html' | 'markdown') => {
   if (newMode === editorMode.value) return
 
-  // MD → HTML: sempre permitido (sem perda)
   if (newMode === 'html') {
     editorMode.value = 'html'
     emit('update:editorMode', 'html')
     return
   }
 
-  // HTML → MD: verificar recursos incompatíveis
   const features = detectHtmlOnlyFeatures()
 
   if (features.length > 0) {
@@ -170,9 +150,6 @@ const tryChangeMode = (newMode: 'html' | 'markdown') => {
   }
 }
 
-/**
- * Força a troca para Markdown mesmo com recursos incompatíveis
- */
 const forceChangeToMarkdown = () => {
   showIncompatibleModal.value = false
   incompatibleFeatures.value = []
@@ -192,19 +169,15 @@ const toggleEditorMode = () => {
 
 const lowlight = createLowlight(common)
 
-// Regex para detectar URLs de YouTube
 const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:\S*)?/
 
-// Regex para detectar URLs de imagens
 const imageUrlRegex = /^https?:\/\/\S+\.(?:jpg|jpeg|png|gif|webp|svg|bmp)(?:\?\S*)?$/i
 
-// Extrai o ID do vídeo do YouTube de uma URL
 const extractYoutubeId = (url: string): string | null => {
   const match = url.match(youtubeRegex)
   return match?.[1] ?? null
 }
 
-// Verifica se é uma URL de imagem
 const isImageUrl = (url: string): boolean => {
   return imageUrlRegex.test(url.trim())
 }
@@ -219,19 +192,16 @@ const editor = useEditor({
       const text = clipboardData.getData('text/plain').trim()
       if (!text) return false
 
-      // Verifica se é URL do YouTube
       const youtubeId = extractYoutubeId(text)
       if (youtubeId) {
         event.preventDefault()
 
         if (isMarkdownMode.value) {
-          // No modo Markdown, insere thumbnail
           editor.value?.chain().focus().setImage({
             src: `https://img.youtube.com/vi/${youtubeId}/0.jpg`,
             alt: `youtube:${youtubeId}`
           }).run()
         } else {
-          // No modo HTML, insere o player
           editor.value?.commands.setYoutubeVideo({
             src: `https://www.youtube.com/watch?v=${youtubeId}`,
             width: 640,
@@ -241,7 +211,6 @@ const editor = useEditor({
         return true
       }
 
-      // Verifica se é URL de imagem
       if (isImageUrl(text)) {
         event.preventDefault()
         editor.value?.chain().focus().setImage({ src: text }).run()
@@ -253,7 +222,7 @@ const editor = useEditor({
   },
   extensions: [
     StarterKit.configure({
-      codeBlock: false, // Desabilitado para usar CodeBlockLowlight
+      codeBlock: false, //desabilitado para usar CodeBlockLowlight
     }),
     CodeBlockLowlight.configure({
       lowlight,
@@ -306,7 +275,6 @@ const editor = useEditor({
   },
 })
 
-// Detecta se o cursor está em um bloco de código e qual a linguagem atual
 const isInCodeBlock = computed(() => editor.value?.isActive('codeBlock') ?? false)
 const currentCodeLanguage = computed(() => {
   if (!editor.value || !isInCodeBlock.value) return ''
@@ -318,26 +286,21 @@ const setCodeLanguage = (language: string) => {
   showLanguageSelector.value = false
 }
 
-// Fecha os dropdowns ao clicar fora
 const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as HTMLElement
 
-  // Fecha seletor de linguagem
   if (!target.closest('.language-selector-wrapper')) {
     showLanguageSelector.value = false
   }
 
-  // Fecha menu de títulos
   if (!target.closest('.heading-dropdown')) {
     showHeadingMenu.value = false
   }
 
-  // Fecha menu de tabela
   if (!target.closest('.table-dropdown')) {
     showTableMenu.value = false
   }
 
-  // Fecha menu de imagem
   if (!target.closest('.image-dropdown')) {
     showImageMenu.value = false
   }
@@ -345,7 +308,6 @@ const handleClickOutside = (event: MouseEvent) => {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
-  // Listener para edição de diagramas Mermaid
   editorContainerRef.value?.addEventListener('mermaid-edit', handleMermaidEdit as EventListener)
 })
 
@@ -361,16 +323,10 @@ watch(() => props.modelValue, (value) => {
   }
 })
 
-/**
- * Converte thumbnails de YouTube (formato MD) para iframes (formato HTML)
- * Procura por imagens com URL de thumbnail do YouTube e substitui por embed
- */
 const convertYoutubeThumbnailsToIframes = () => {
   if (!editor.value) return
 
   const html = editor.value.getHTML()
-  // Regex para encontrar imagens com src de thumbnail do YouTube
-  // Formato: https://img.youtube.com/vi/VIDEO_ID/0.jpg (ou outras variações como maxresdefault.jpg)
   const thumbnailRegex = /<img[^>]*src="https:\/\/img\.youtube\.com\/vi\/([a-zA-Z0-9_-]+)\/[^"]*"[^>]*\/?>/gi
 
   let newHtml = html
@@ -380,7 +336,6 @@ const convertYoutubeThumbnailsToIframes = () => {
     const fullMatch = match[0]
     const videoId = match[1]
 
-    // Cria o HTML do iframe do YouTube (mesmo formato que o Tiptap usa)
     const iframeHtml = `<div data-youtube-video><iframe src="https://www.youtube-nocookie.com/embed/${videoId}" allowfullscreen="true"></iframe></div>`
 
     newHtml = newHtml.replace(fullMatch, iframeHtml)
@@ -391,15 +346,10 @@ const convertYoutubeThumbnailsToIframes = () => {
   }
 }
 
-/**
- * Converte iframes de YouTube (formato HTML) para thumbnails (formato MD)
- * Procura por divs com data-youtube-video e substitui por imagem com alt especial
- */
 const convertYoutubeIframesToThumbnails = () => {
   if (!editor.value) return
 
   const html = editor.value.getHTML()
-  // Regex para encontrar divs de YouTube com iframe
   const iframeRegex = /<div[^>]*data-youtube-video[^>]*>.*?<iframe[^>]*src="[^"]*(?:youtube\.com|youtu\.be|youtube-nocookie\.com)\/embed\/([a-zA-Z0-9_-]+)[^"]*"[^>]*>.*?<\/iframe>.*?<\/div>/gi
 
   let newHtml = html
@@ -409,7 +359,6 @@ const convertYoutubeIframesToThumbnails = () => {
     const fullMatch = match[0]
     const videoId = match[1]
 
-    // Cria a imagem com alt especial para identificar como vídeo no modo MD
     const thumbnailHtml = `<img src="https://img.youtube.com/vi/${videoId}/0.jpg" alt="youtube:${videoId}">`
 
     newHtml = newHtml.replace(fullMatch, thumbnailHtml)
@@ -420,15 +369,12 @@ const convertYoutubeIframesToThumbnails = () => {
   }
 }
 
-// Watcher para converter vídeos quando o modo muda
 watch(editorMode, (newMode, oldMode) => {
   if (newMode === oldMode) return
 
   if (newMode === 'html' && oldMode === 'markdown') {
-    // MD → HTML: converter thumbnails para iframes
     convertYoutubeThumbnailsToIframes()
   } else if (newMode === 'markdown' && oldMode === 'html') {
-    // HTML → MD: converter iframes para thumbnails
     convertYoutubeIframesToThumbnails()
   }
 
@@ -463,7 +409,6 @@ const handleLinkSubmit = (url: string) => {
 }
 
 const handleMarkdownLinkSubmit = (text: string, url: string) => {
-  // Insere o texto com o link aplicado (será convertido para [text](url) no export)
   editor.value?.chain().focus().insertContent({
     type: 'text',
     text: text,
@@ -486,7 +431,7 @@ const handleImageUrlSubmit = (url: string) => {
   showImageUrlModal.value = false
 }
 
-// Limite de tamanho de imagem: 600KB
+//limite de tamanho de imagem: 600KB
 const MAX_IMAGE_SIZE = 600 * 1024
 const imageError = ref('')
 
@@ -511,11 +456,9 @@ const onFileChange = (event: Event) => {
     }
 
     if (props.onImageUpload) {
-      // Usa a função do pai para obter o URL (Object URL gerenciado externamente)
       const imageUrl = props.onImageUpload(file)
       editor.value?.chain().focus().setImage({ src: imageUrl }).run()
     } else {
-      // Fallback: usa base64 (comportamento antigo)
       const reader = new FileReader()
       reader.onload = () => {
         const imageUrl = reader.result as string
@@ -524,13 +467,10 @@ const onFileChange = (event: Event) => {
       reader.readAsDataURL(file)
     }
   }
-  target.value = '' // Reset input para permitir mesmo arquivo novamente
+  target.value = ''
   showImageMenu.value = false
 }
 
-/**
- * Extrai o ID do vídeo de uma URL do YouTube
- */
 const extractYoutubeVideoId = (url: string): string | null => {
   const patterns = [
     /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
@@ -553,23 +493,17 @@ const openVideoModal = () => {
 }
 
 const handleVideoSubmit = (url: string) => {
-  //no modo Markdown, insere a thumbnail como imagem para preview
-  //a conversão para o formato markdown com link é feita no htmlToMarkdown
   if (isMarkdownMode.value) {
     const videoId = extractYoutubeVideoId(url)
     if (videoId) {
-      //insere a imagem da thumbnail com alt text especial para identificar como vídeo
-      //formato do alt: "youtube:VIDEO_ID" permite identificar na conversão
       editor.value?.chain().focus().setImage({
         src: `https://img.youtube.com/vi/${videoId}/0.jpg`,
         alt: `youtube:${videoId}`
       }).run()
     } else {
-      //se não conseguir extrair o ID, insere apenas o link como texto
       editor.value?.chain().focus().insertContent(`[Assista no YouTube](${url})`).run()
     }
   } else {
-    //no modo HTML, usa o embed normal do YouTube
     editor.value?.commands.setYoutubeVideo({
       src: url,
       width: 640,
@@ -593,7 +527,6 @@ const handleLatexSubmit = (latex: string) => {
   showLatexModal.value = false
 }
 
-// Estado para edição de Mermaid
 const mermaidEditContent = ref('')
 const mermaidUpdateFn = ref<((content: string) => void) | null>(null)
 const isMermaidEditMode = computed(() => !!mermaidUpdateFn.value)
@@ -612,11 +545,9 @@ const handleMermaidEdit = (event: CustomEvent<{ content: string; updateContent: 
 
 const handleMermaidSubmit = (mermaidCode: string) => {
   if (mermaidUpdateFn.value) {
-    // Modo edição: atualiza o diagrama existente
     mermaidUpdateFn.value(mermaidCode)
     mermaidUpdateFn.value = null
   } else {
-    // Modo inserção: insere novo diagrama
     editor.value?.chain().focus().insertMermaid(mermaidCode).run()
   }
   mermaidEditContent.value = ''
