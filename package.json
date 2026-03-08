@@ -3,7 +3,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "NUXT_PUBLIC_API_BASE=$([ \"$CF_PAGES_BRANCH\" = \"main\" ] && echo 'https://api.falae.dev' || echo 'https://test-api.falae.dev') nuxt build",
+    "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
