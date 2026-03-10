@@ -1,6 +1,6 @@
 # Falae.dev - Client
 
-Frontend da plataforma **Falae.dev**, uma comunidade para compartilhamento de artigos e discussões técnicas.
+Frontend do fórum **Falae.dev**, uma comunidade para compartilhamento de artigos e discussões técnicas.
 
 ## Tecnologias
 
@@ -73,3 +73,15 @@ app/
 ├── pages/          # Páginas/rotas
 └── utils/          # Funções utilitárias
 ```
+
+## Ambientes
+
+### prd
+front: https://falae.dev
+
+back: https://api.falae.dev
+
+### hmg
+front: https://test.falae.dev
+
+back: https://test-api.falae.dev
