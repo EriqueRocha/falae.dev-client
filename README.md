@@ -85,3 +85,5 @@ back: https://api.falae.dev
 front: https://test.falae.dev
 
 back: https://test-api.falae.dev
+
+**OBS: o back do ambiente de homologação tem um cold start de 1min**
