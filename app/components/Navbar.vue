@@ -1,11 +1,25 @@
 <script setup lang="ts">
 const { user, isAuthenticated, logout, validateToken } = useAuth()
+const {
+  notifications,
+  unreadCount,
+  isLoading: isLoadingNotifications,
+  fetchUnreadCount,
+  fetchNotifications,
+  loadMore: loadMoreNotifications,
+  markAsRead,
+  markAllAsRead,
+  getNotificationMessage,
+  formatTimeAgo
+} = useNotifications()
 const config = useRuntimeConfig()
 const apiBase = config.public.apiBase
 const router = useRouter()
 
 const mobileMenuOpen = ref(false)
 const searchQuery = ref('')
+const notificationsOpen = ref(false)
+const notificationsRef = ref<HTMLElement | null>(null)
 
 interface SearchResult {
   id: string
@@ -182,11 +196,88 @@ const handleClickOutside = (event: MouseEvent) => {
   if (!target.closest('.search-container')) {
     showResults.value = false
   }
+  if (!target.closest('.notifications-container')) {
+    notificationsOpen.value = false
+  }
 }
 
-onMounted(() => {
+const toggleNotifications = async () => {
+  notificationsOpen.value = !notificationsOpen.value
+  if (notificationsOpen.value && notifications.value.length === 0) {
+    await fetchNotifications()
+  }
+}
+
+const handleNotificationClick = async (notification: typeof notifications.value[0]) => {
+  if (!notification.isRead) {
+    await markAsRead(notification.id)
+  }
+
+  const { interactionType, targetSlug, commentId, parentContentType } = notification
+
+  if (!user.value?.userName || !targetSlug) {
+    notificationsOpen.value = false
+    mobileMenuOpen.value = false
+    return
+  }
+
+  const commentQuery = commentId ? `?commentId=${commentId}` : ''
+
+  switch (interactionType) {
+    case 'COMMENT_ON_ARTICLE':
+      router.push(`/artigo/${user.value.userName}/${targetSlug}${commentQuery}`)
+      break
+    case 'LIKE_ARTICLE':
+    case 'SAVE_ARTICLE':
+      router.push(`/artigo/${user.value.userName}/${targetSlug}`)
+      break
+    case 'COMMENT_ON_TOPIC':
+      router.push(`/topico/${user.value.userName}/${targetSlug}${commentQuery}`)
+      break
+    case 'LIKE_TOPIC':
+      router.push(`/topico/${user.value.userName}/${targetSlug}`)
+      break
+    case 'REPLY_TO_COMMENT':
+      // Usa parentContentType para saber se e artigo ou topico
+      if (parentContentType === 'ARTICLE') {
+        router.push(`/artigo/${user.value.userName}/${targetSlug}${commentQuery}`)
+      } else if (parentContentType === 'TOPIC') {
+        router.push(`/topico/${user.value.userName}/${targetSlug}${commentQuery}`)
+      }
+      break
+    case 'LIKE_COMMENT':
+      // Usa parentContentType para saber se e artigo ou topico
+      if (parentContentType === 'ARTICLE') {
+        router.push(`/artigo/${user.value.userName}/${targetSlug}${commentQuery}`)
+      } else if (parentContentType === 'TOPIC') {
+        router.push(`/topico/${user.value.userName}/${targetSlug}${commentQuery}`)
+      }
+      break
+  }
+
+  notificationsOpen.value = false
+  mobileMenuOpen.value = false
+}
+
+const handleNotificationsScroll = (event: Event) => {
+  const target = event.target as HTMLElement
+  if (target.scrollTop + target.clientHeight >= target.scrollHeight - 50) {
+    loadMoreNotifications()
+  }
+}
+
+onMounted(async () => {
   validateToken()
   document.addEventListener('click', handleClickOutside)
+  if (isAuthenticated.value) {
+    await fetchUnreadCount()
+  }
+})
+
+watch(isAuthenticated, async (newVal) => {
+  if (newVal) {
+    await fetchUnreadCount()
+  }
 })
 
 onUnmounted(() => {
@@ -315,6 +406,101 @@ onUnmounted(() => {
           </div>
         </div>
         <template v-if="isAuthenticated">
+          <!-- Notifications Bell -->
+          <div class="relative notifications-container" ref="notificationsRef">
+            <button
+              @click.stop="toggleNotifications"
+              class="relative p-2 text-slate-400 hover:text-white transition-colors"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span
+                v-if="unreadCount > 0"
+                class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
+              >
+                {{ unreadCount > 99 ? '99+' : unreadCount }}
+              </span>
+            </button>
+
+            <!-- Notifications Dropdown -->
+            <div
+              v-if="notificationsOpen"
+              class="absolute right-0 mt-2 w-80 bg-slate-800 rounded-lg shadow-lg border border-slate-700 overflow-hidden z-50"
+            >
+              <div class="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+                <h3 class="text-white font-semibold">Notificações</h3>
+                <button
+                  v-if="unreadCount > 0"
+                  @click="markAllAsRead"
+                  class="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                >
+                  Marcar todas como lidas
+                </button>
+              </div>
+
+              <div
+                class="max-h-96 overflow-y-auto"
+                @scroll="handleNotificationsScroll"
+              >
+                <div v-if="isLoadingNotifications && notifications.length === 0" class="px-4 py-8 text-center">
+                  <div class="w-6 h-6 border-2 border-slate-500 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
+                </div>
+
+                <div v-else-if="notifications.length === 0" class="px-4 py-8 text-center text-slate-400">
+                  Nenhuma notificacao
+                </div>
+
+                <button
+                  v-for="notification in notifications"
+                  :key="notification.id"
+                  @click="handleNotificationClick(notification)"
+                  class="w-full px-4 py-3 text-left hover:bg-slate-700/50 transition-colors border-b border-slate-700/50 flex items-start gap-3"
+                  :class="{ 'bg-slate-700/30': !notification.isRead }"
+                >
+                  <!-- Actor Avatar -->
+                  <img
+                    v-if="notification.actorProfileImageUrl"
+                    :src="notification.actorProfileImageUrl"
+                    :alt="notification.actorName"
+                    class="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                  />
+                  <div
+                    v-else
+                    class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0"
+                  >
+                    <span class="text-white font-semibold text-sm">
+                      {{ notification.actorName?.charAt(0).toUpperCase() }}
+                    </span>
+                  </div>
+
+                  <!-- Content -->
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm text-slate-200">
+                      <span class="font-semibold">{{ notification.actorName }}</span>&nbsp;<span class="text-slate-400">{{ getNotificationMessage(notification) }}</span>
+                    </p>
+                    <p v-if="notification.targetTitle" class="text-xs text-slate-400 truncate mt-0.5">
+                      {{ notification.targetTitle }}
+                    </p>
+                    <p class="text-xs text-slate-500 mt-1">
+                      {{ formatTimeAgo(notification.createdAt) }}
+                    </p>
+                  </div>
+
+                  <!-- Unread indicator -->
+                  <div
+                    v-if="!notification.isRead"
+                    class="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2"
+                  ></div>
+                </button>
+
+                <div v-if="isLoadingNotifications && notifications.length > 0" class="px-4 py-3 text-center">
+                  <div class="w-5 h-5 border-2 border-slate-500 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="relative group">
             <NuxtLink to="/perfil">
               <img
@@ -490,6 +676,94 @@ onUnmounted(() => {
       </div>
 
       <template v-if="isAuthenticated">
+        <!-- Mobile Notifications -->
+        <div class="relative notifications-container">
+          <button
+            @click.stop="toggleNotifications"
+            class="flex items-center gap-3 text-slate-300 hover:text-white transition-colors w-full"
+          >
+            <div class="relative">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span
+                v-if="unreadCount > 0"
+                class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-0.5 text-[10px]"
+              >
+                {{ unreadCount > 99 ? '99+' : unreadCount }}
+              </span>
+            </div>
+            <span>Notificacoes</span>
+          </button>
+
+          <!-- Mobile Notifications Dropdown -->
+          <div
+            v-if="notificationsOpen"
+            class="mt-2 bg-slate-800 rounded-lg border border-slate-700 overflow-hidden"
+          >
+            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+              <h3 class="text-white font-semibold text-sm">Notificacoes</h3>
+              <button
+                v-if="unreadCount > 0"
+                @click="markAllAsRead"
+                class="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                Marcar todas
+              </button>
+            </div>
+
+            <div
+              class="max-h-64 overflow-y-auto"
+              @scroll="handleNotificationsScroll"
+            >
+              <div v-if="isLoadingNotifications && notifications.length === 0" class="px-4 py-6 text-center">
+                <div class="w-5 h-5 border-2 border-slate-500 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
+              </div>
+
+              <div v-else-if="notifications.length === 0" class="px-4 py-6 text-center text-slate-400 text-sm">
+                Nenhuma notificacao
+              </div>
+
+              <button
+                v-for="notification in notifications"
+                :key="notification.id"
+                @click="handleNotificationClick(notification)"
+                class="w-full px-3 py-2.5 text-left hover:bg-slate-700/50 transition-colors border-b border-slate-700/50 flex items-start gap-2"
+                :class="{ 'bg-slate-700/30': !notification.isRead }"
+              >
+                <img
+                  v-if="notification.actorProfileImageUrl"
+                  :src="notification.actorProfileImageUrl"
+                  :alt="notification.actorName"
+                  class="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                />
+                <div
+                  v-else
+                  class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0"
+                >
+                  <span class="text-white font-semibold text-xs">
+                    {{ notification.actorName?.charAt(0).toUpperCase() }}
+                  </span>
+                </div>
+
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs text-slate-200">
+                    <span class="font-semibold">{{ notification.actorName }}</span>&nbsp;<span class="text-slate-400">{{ getNotificationMessage(notification) }}</span>
+                  </p>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    {{ formatTimeAgo(notification.createdAt) }}
+                  </p>
+                </div>
+
+                <div
+                  v-if="!notification.isRead"
+                  class="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1"
+                ></div>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <NuxtLink
           to="/perfil"
           class="flex items-center gap-3 text-slate-300 hover:text-white transition-colors"
