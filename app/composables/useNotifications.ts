@@ -11,6 +11,7 @@ export interface Interaction {
   targetSlug: string | null
   commentId: string | null
   parentContentType: 'ARTICLE' | 'TOPIC' | null
+  parentAuthorUserName: string | null
   isRead: boolean
   createdAt: string
 }

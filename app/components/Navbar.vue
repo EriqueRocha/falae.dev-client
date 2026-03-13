@@ -213,9 +213,9 @@ const handleNotificationClick = async (notification: typeof notifications.value[
     await markAsRead(notification.id)
   }
 
-  const { interactionType, targetSlug, commentId, parentContentType } = notification
+  const { interactionType, targetSlug, commentId, parentContentType, parentAuthorUserName } = notification
 
-  if (!user.value?.userName || !targetSlug) {
+  if (!targetSlug) {
     notificationsOpen.value = false
     mobileMenuOpen.value = false
     return
@@ -225,32 +225,32 @@ const handleNotificationClick = async (notification: typeof notifications.value[
 
   switch (interactionType) {
     case 'COMMENT_ON_ARTICLE':
-      router.push(`/artigo/${user.value.userName}/${targetSlug}${commentQuery}`)
+      router.push(`/artigo/${user.value?.userName}/${targetSlug}${commentQuery}`)
       break
     case 'LIKE_ARTICLE':
     case 'SAVE_ARTICLE':
-      router.push(`/artigo/${user.value.userName}/${targetSlug}`)
+      router.push(`/artigo/${user.value?.userName}/${targetSlug}`)
       break
     case 'COMMENT_ON_TOPIC':
-      router.push(`/topico/${user.value.userName}/${targetSlug}${commentQuery}`)
+      router.push(`/topico/${user.value?.userName}/${targetSlug}${commentQuery}`)
       break
     case 'LIKE_TOPIC':
-      router.push(`/topico/${user.value.userName}/${targetSlug}`)
+      router.push(`/topico/${user.value?.userName}/${targetSlug}`)
       break
     case 'REPLY_TO_COMMENT':
-      // Usa parentContentType para saber se e artigo ou topico
-      if (parentContentType === 'ARTICLE') {
-        router.push(`/artigo/${user.value.userName}/${targetSlug}${commentQuery}`)
-      } else if (parentContentType === 'TOPIC') {
-        router.push(`/topico/${user.value.userName}/${targetSlug}${commentQuery}`)
+      // Usa parentAuthorUserName (autor do artigo/topico) e parentContentType
+      if (parentContentType === 'ARTICLE' && parentAuthorUserName) {
+        router.push(`/artigo/${parentAuthorUserName}/${targetSlug}${commentQuery}`)
+      } else if (parentContentType === 'TOPIC' && parentAuthorUserName) {
+        router.push(`/topico/${parentAuthorUserName}/${targetSlug}${commentQuery}`)
       }
       break
     case 'LIKE_COMMENT':
-      // Usa parentContentType para saber se e artigo ou topico
-      if (parentContentType === 'ARTICLE') {
-        router.push(`/artigo/${user.value.userName}/${targetSlug}${commentQuery}`)
-      } else if (parentContentType === 'TOPIC') {
-        router.push(`/topico/${user.value.userName}/${targetSlug}${commentQuery}`)
+      // Usa parentAuthorUserName (autor do artigo/topico) e parentContentType
+      if (parentContentType === 'ARTICLE' && parentAuthorUserName) {
+        router.push(`/artigo/${parentAuthorUserName}/${targetSlug}${commentQuery}`)
+      } else if (parentContentType === 'TOPIC' && parentAuthorUserName) {
+        router.push(`/topico/${parentAuthorUserName}/${targetSlug}${commentQuery}`)
       }
       break
   }
