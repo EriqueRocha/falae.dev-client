@@ -57,6 +57,7 @@ const loading = ref(true)
 const isSaving = ref(false)
 const isPublishing = ref(false)
 const saveProgress = ref('')
+const publishProgress = ref('')
 const isPrivate = ref(false)
 
 const pendingImages = ref<PendingImage[]>([])
@@ -390,17 +391,21 @@ const handlePublish = async () => {
   if (error.value) return
 
   isPublishing.value = true
+  publishProgress.value = 'Publicando...'
   try {
     await $fetch(`${apiBase}/article/${articleId.value}/publish`, {
       method: 'POST',
       credentials: 'include'
     })
     isPrivate.value = false
+    publishProgress.value = 'Finalizando...'
+    await new Promise(resolve => setTimeout(resolve, 3000))
     navigateTo(`/artigo/${article.value?.authorUserName}/${article.value?.slug}`)
   } catch (e: any) {
     error.value = e?.data?.message || 'Erro ao publicar artigo'
   } finally {
     isPublishing.value = false
+    publishProgress.value = ''
   }
 }
 
@@ -581,7 +586,7 @@ onBeforeUnmount(() => {
               @click="handlePublish"
               class="flex-1 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white font-medium py-2.5 sm:py-3 text-sm sm:text-base rounded-lg transition-colors"
             >
-              {{ isPublishing ? 'Publicando...' : 'Publicar Artigo' }}
+              {{ isPublishing ? publishProgress : 'Publicar Artigo' }}
             </button>
           </div>
         </form>
