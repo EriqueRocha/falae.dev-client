@@ -15,6 +15,7 @@ interface SaveNewResponse {
   message: string
   id: string
   title: string
+  slug: string
 }
 
 interface ImageUploadResponse {
@@ -100,7 +101,7 @@ export function useArticlePublish() {
     content: string,
     isMarkdown: boolean,
     coverFile?: File
-  ): Promise<{ success: boolean; articleId?: string; error?: string }> => {
+  ): Promise<{ success: boolean; articleId?: string; slug?: string; error?: string }> => {
     isPublishing.value = true
 
     try {
@@ -148,7 +149,7 @@ export function useArticlePublish() {
 
       publishProgress.value = articleData.isPrivate ? 'Salvo!' : 'Publicado!'
 
-      return { success: true, articleId }
+      return { success: true, articleId, slug: saveNewResponse.slug }
     } catch (error: any) {
       console.error('Erro ao publicar:', error)
       return {

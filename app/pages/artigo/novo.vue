@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { isAuthenticated } = useAuth()
+const { isAuthenticated, user } = useAuth()
 const { addLocalImage, publish, isPublishing, publishProgress, clearPendingImages } = useArticlePublish()
 
 const editorRef = shallowRef<{
@@ -153,7 +153,11 @@ const handleSubmit = async (isPrivate = false) => {
   )
 
   if (result.success) {
-    navigateTo('/')
+    if (isPrivate) {
+      navigateTo(`/autor/${user.value?.userName}`)
+    } else {
+      navigateTo(`/artigo/${user.value?.userName}/${result.slug}`)
+    }
   } else {
     error.value = result.error || (isPrivate ? 'Erro ao salvar artigo. Tente novamente.' : 'Erro ao publicar artigo. Tente novamente.')
   }

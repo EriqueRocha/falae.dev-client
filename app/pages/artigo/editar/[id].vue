@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { markdownToHtml } from '~/utils/markdownToHtml'
+import { toSlug } from '~/utils/toSlug'
 
 interface Article {
   id: string
@@ -374,9 +375,11 @@ const handleSubmit = async () => {
       await uploadCover(articleId.value, coverFile.value)
     }
 
+    saveProgress.value = 'Finalizando...'
+    await new Promise(resolve => setTimeout(resolve, 2000))
     saveProgress.value = 'Salvo!'
 
-    navigateTo(`/artigo/${article.value?.authorUserName}/${article.value?.slug}`)
+    navigateTo(`/artigo/${article.value?.authorUserName}/${toSlug(title.value)}`)
   } catch (e: any) {
     console.error('Erro ao salvar:', e)
     error.value = e?.data?.message || e?.message || 'Erro ao salvar artigo'
@@ -385,11 +388,7 @@ const handleSubmit = async () => {
   }
 }
 
-const handlePublish = async () => {
-  await handleSubmit()
-
-  if (error.value) return
-
+const handlePublishOnly = async () => {
   isPublishing.value = true
   publishProgress.value = 'Publicando...'
   try {
@@ -400,13 +399,138 @@ const handlePublish = async () => {
     isPrivate.value = false
     publishProgress.value = 'Finalizando...'
     await new Promise(resolve => setTimeout(resolve, 3000))
-    navigateTo(`/artigo/${article.value?.authorUserName}/${article.value?.slug}`)
+    navigateTo(`/artigo/${article.value?.authorUserName}/${toSlug(title.value)}`)
   } catch (e: any) {
     error.value = e?.data?.message || 'Erro ao publicar artigo'
   } finally {
     isPublishing.value = false
     publishProgress.value = ''
   }
+}
+
+const handleSaveAndPublish = async () => {
+  error.value = ''
+
+  if (!title.value.trim()) {
+    error.value = 'O título é obrigatório'
+    return
+  }
+
+  if (!description.value.trim()) {
+    error.value = 'A descrição é obrigatória'
+    return
+  }
+
+  if (tags.value.length === 0) {
+    error.value = 'Adicione pelo menos uma tag'
+    return
+  }
+
+  if (tags.value.length > MAX_TAGS) {
+    error.value = `O artigo pode ter no máximo ${MAX_TAGS} tags`
+    return
+  }
+
+  if (!editorContent.value.trim() || editorRef.value?.isEmpty()) {
+    error.value = 'O conteúdo do artigo é obrigatório'
+    return
+  }
+
+  const contentToValidate = editorRef.value?.getContent() ?? editorContent.value
+  const textContent = contentToValidate.replace(/<[^>]*>/g, '').trim()
+  if (textContent.length < MIN_CONTENT_LENGTH) {
+    error.value = `O conteúdo do artigo deve ter no mínimo ${MIN_CONTENT_LENGTH} caracteres. Atualmente: ${textContent.length}`
+    return
+  }
+
+  isSaving.value = true
+  isPublishing.value = true
+
+  try {
+    const isMarkdown = editorRef.value?.getIsMarkdownMode() ?? false
+    let processedContent = editorRef.value?.getContent() ?? editorContent.value
+
+    const imagesToUpload = pendingImages.value.filter(img =>
+      processedContent.includes(img.objectUrl)
+    )
+
+    pendingImages.value
+      .filter(img => !processedContent.includes(img.objectUrl))
+      .forEach(img => URL.revokeObjectURL(img.objectUrl))
+
+    if (imagesToUpload.length > 0) {
+      saveProgress.value = `Enviando imagens (0/${imagesToUpload.length})...`
+
+      for (let i = 0; i < imagesToUpload.length; i++) {
+        const pending = imagesToUpload[i]!
+        saveProgress.value = `Enviando imagens (${i + 1}/${imagesToUpload.length})...`
+
+        const imagePath = await uploadImage(articleId.value, pending.file)
+        processedContent = processedContent.replaceAll(pending.objectUrl, imagePath)
+        URL.revokeObjectURL(pending.objectUrl)
+      }
+    }
+    pendingImages.value = []
+
+    const contentForComparison = isMarkdown ? markdownToHtml(processedContent) : processedContent
+    const deletedImagePaths = getDeletedImagePaths(contentForComparison)
+
+    const coverWasRemoved = originalCoverUrl.value && !coverPreview.value
+    const coverWasReplaced = originalCoverUrl.value && coverFile.value
+
+    if ((coverWasRemoved || coverWasReplaced) && originalCoverUrl.value) {
+      const coverPath = extractS3Path(originalCoverUrl.value)
+      if (coverPath) {
+        deletedImagePaths.push(coverPath)
+      }
+    }
+
+    saveProgress.value = 'Atualizando artigo...'
+    await $fetch(`${apiBase}/article/edit`, {
+      method: 'PUT',
+      body: {
+        articleId: articleId.value,
+        title: title.value,
+        description: description.value,
+        tags: tags.value,
+        originalPost: originalPost.value || null,
+        deletedImagePaths: deletedImagePaths.length > 0 ? deletedImagePaths : null
+      },
+      credentials: 'include'
+    })
+
+    saveProgress.value = 'Salvando conteúdo...'
+    await saveContent(articleId.value, processedContent, isMarkdown)
+
+    if (coverFile.value) {
+      saveProgress.value = 'Enviando capa...'
+      await uploadCover(articleId.value, coverFile.value)
+    }
+
+    // Agora publica
+    publishProgress.value = 'Publicando...'
+    await $fetch(`${apiBase}/article/${articleId.value}/publish`, {
+      method: 'POST',
+      credentials: 'include'
+    })
+    isPrivate.value = false
+
+    publishProgress.value = 'Finalizando...'
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    navigateTo(`/artigo/${article.value?.authorUserName}/${toSlug(title.value)}`)
+  } catch (e: any) {
+    console.error('Erro:', e)
+    error.value = e?.data?.message || e?.message || 'Erro ao salvar/publicar artigo'
+  } finally {
+    isSaving.value = false
+    isPublishing.value = false
+    publishProgress.value = ''
+  }
+}
+
+const handlePublish = async () => {
+  await handleSaveAndPublish()
 }
 
 onMounted(() => {
