@@ -8,6 +8,7 @@ interface ArticleData {
   description: string
   tags: string[]
   originalPost?: string
+  isPrivate?: boolean
 }
 
 interface SaveNewResponse {
@@ -145,7 +146,7 @@ export function useArticlePublish() {
         await uploadCover(articleId, coverFile)
       }
 
-      publishProgress.value = 'Publicado!'
+      publishProgress.value = articleData.isPrivate ? 'Salvo!' : 'Publicado!'
 
       return { success: true, articleId }
     } catch (error: any) {

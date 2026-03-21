@@ -15,6 +15,7 @@ interface Article {
   tags: string[]
   description: string
   urlArticleContent: string
+  isPrivate?: boolean
 }
 
 interface PendingImage {
@@ -54,7 +55,9 @@ const originalImageUrls = ref<string[]>([])
 
 const loading = ref(true)
 const isSaving = ref(false)
+const isPublishing = ref(false)
 const saveProgress = ref('')
+const isPrivate = ref(false)
 
 const pendingImages = ref<PendingImage[]>([])
 
@@ -166,6 +169,7 @@ const fetchArticle = async () => {
 
     article.value = data
     originalIsMarkdown.value = data.isMarkdown
+    isPrivate.value = data.isPrivate ?? false
 
     title.value = data.title
     description.value = data.description
@@ -380,6 +384,26 @@ const handleSubmit = async () => {
   }
 }
 
+const handlePublish = async () => {
+  await handleSubmit()
+
+  if (error.value) return
+
+  isPublishing.value = true
+  try {
+    await $fetch(`${apiBase}/article/${articleId.value}/publish`, {
+      method: 'POST',
+      credentials: 'include'
+    })
+    isPrivate.value = false
+    navigateTo(`/artigo/${article.value?.authorUserName}/${article.value?.slug}`)
+  } catch (e: any) {
+    error.value = e?.data?.message || 'Erro ao publicar artigo'
+  } finally {
+    isPublishing.value = false
+  }
+}
+
 onMounted(() => {
   fetchArticle()
 })
@@ -545,10 +569,19 @@ onBeforeUnmount(() => {
             </NuxtLink>
             <button
               type="submit"
-              :disabled="isSaving"
-              class="flex-1 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white font-medium py-2.5 sm:py-3 text-sm sm:text-base rounded-lg transition-colors"
+              :disabled="isSaving || isPublishing"
+              class="px-4 sm:px-6 py-2.5 sm:py-3 bg-slate-600 hover:bg-slate-500 disabled:bg-slate-600/50 text-white font-medium text-sm sm:text-base rounded-lg transition-colors"
             >
               {{ isSaving ? saveProgress : 'Salvar Alterações' }}
+            </button>
+            <button
+              v-if="isPrivate"
+              type="button"
+              :disabled="isSaving || isPublishing"
+              @click="handlePublish"
+              class="flex-1 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white font-medium py-2.5 sm:py-3 text-sm sm:text-base rounded-lg transition-colors"
+            >
+              {{ isPublishing ? 'Publicando...' : 'Publicar Artigo' }}
             </button>
           </div>
         </form>

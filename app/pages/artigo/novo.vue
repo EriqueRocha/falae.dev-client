@@ -95,40 +95,46 @@ const removeCover = () => {
   coverPreview.value = null
 }
 
-const handleSubmit = async () => {
+const validateForm = (): boolean => {
   error.value = ''
 
   if (!title.value.trim()) {
     error.value = 'O título é obrigatório'
-    return
+    return false
   }
 
   if (!description.value.trim()) {
     error.value = 'A descrição é obrigatória'
-    return
+    return false
   }
 
   if (tags.value.length === 0) {
     error.value = 'Adicione pelo menos uma tag'
-    return
+    return false
   }
 
   if (tags.value.length > MAX_TAGS) {
     error.value = `O artigo pode ter no máximo ${MAX_TAGS} tags`
-    return
+    return false
   }
 
   if (!editorContent.value.trim() || editorRef.value?.isEmpty()) {
     error.value = 'O conteúdo do artigo é obrigatório'
-    return
+    return false
   }
 
   const contentToValidate = editorRef.value?.getContent() ?? editorContent.value
   const textContent = contentToValidate.replace(/<[^>]*>/g, '').trim()
   if (textContent.length < MIN_CONTENT_LENGTH) {
     error.value = `O conteúdo do artigo deve ter no mínimo ${MIN_CONTENT_LENGTH} caracteres.`
-    return
+    return false
   }
+
+  return true
+}
+
+const handleSubmit = async (isPrivate = false) => {
+  if (!validateForm()) return
 
   const isMarkdown = editorRef.value?.getIsMarkdownMode() ?? false
   const contentToPublish = editorRef.value?.getContent() ?? editorContent.value
@@ -138,7 +144,8 @@ const handleSubmit = async () => {
       title: title.value,
       description: description.value,
       tags: tags.value,
-      originalPost: originalPost.value || undefined
+      originalPost: originalPost.value || undefined,
+      isPrivate
     },
     contentToPublish,
     isMarkdown,
@@ -148,7 +155,7 @@ const handleSubmit = async () => {
   if (result.success) {
     navigateTo('/')
   } else {
-    error.value = result.error || 'Erro ao publicar artigo. Tente novamente.'
+    error.value = result.error || (isPrivate ? 'Erro ao salvar artigo. Tente novamente.' : 'Erro ao publicar artigo. Tente novamente.')
   }
 }
 
@@ -200,7 +207,7 @@ onBeforeUnmount(() => {
         </label>
       </div>
 
-      <form @submit.prevent="handleSubmit" class="space-y-4 sm:space-y-6">
+      <form @submit.prevent="handleSubmit(false)" class="space-y-4 sm:space-y-6">
         <div>
           <label class="block text-slate-300 text-sm font-medium mt-4 mb-2">Título*</label>
           <input
@@ -295,6 +302,14 @@ onBeforeUnmount(() => {
           >
             Cancelar
           </NuxtLink>
+          <button
+            type="button"
+            :disabled="isPublishing"
+            @click="handleSubmit(true)"
+            class="px-4 sm:px-6 py-2.5 sm:py-3 bg-slate-600 hover:bg-slate-500 disabled:bg-slate-600/50 text-white font-medium text-sm sm:text-base rounded-lg transition-colors"
+          >
+            {{ isPublishing ? publishProgress : 'Salvar' }}
+          </button>
           <button
             type="submit"
             :disabled="isPublishing"

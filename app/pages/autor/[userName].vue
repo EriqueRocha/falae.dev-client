@@ -214,7 +214,7 @@ interface CommentPageResponse extends PageResponse<Comment> {
   comments: Comment[]
 }
 
-type FilterType = 'artigos' | 'topicos' | 'comentarios'
+type FilterType = 'artigos' | 'topicos' | 'comentarios' | 'rascunhos'
 type SortType = 'RECENT' | 'OLDEST' | 'LIKES' | 'SAVES' | 'COMMENTS'
 
 const activeFilter = ref<FilterType>('artigos')
@@ -226,13 +226,16 @@ const profile = ref<AuthorProfile | null>(null)
 const articles = ref<Article[]>([])
 const topics = ref<Topic[]>([])
 const comments = ref<Comment[]>([])
+const drafts = ref<Article[]>([])
 
 const articlesPage = ref(0)
 const topicsPage = ref(0)
 const commentsPage = ref(0)
+const draftsPage = ref(0)
 const hasMoreArticles = ref(false)
 const hasMoreTopics = ref(false)
 const hasMoreComments = ref(false)
+const hasMoreDrafts = ref(false)
 
 const fetchProfile = async () => {
   const data = await $fetch<AuthorProfile>(`${apiBase}/api/authors/${userName.value}`, {
@@ -292,9 +295,28 @@ const fetchComments = async (page = 0, reset = false) => {
   hasMoreComments.value = data.hasNext
 }
 
+const fetchDrafts = async (page = 0, reset = false) => {
+  const data = await $fetch<ArticlePageResponse>(
+    `${apiBase}/article/private`,
+    {
+      params: { page, size: 10, sort: currentSort.value },
+      credentials: 'include'
+    }
+  )
+  if (reset) {
+    drafts.value = data.articles
+  } else {
+    drafts.value.push(...data.articles)
+  }
+  draftsPage.value = data.page
+  hasMoreDrafts.value = data.hasNext
+}
+
 const loadMore = async () => {
   if (activeFilter.value === 'artigos' && hasMoreArticles.value) {
     await fetchArticles(articlesPage.value + 1)
+  } else if (activeFilter.value === 'rascunhos' && hasMoreDrafts.value) {
+    await fetchDrafts(draftsPage.value + 1)
   } else if (activeFilter.value === 'topicos' && hasMoreTopics.value) {
     await fetchTopics(topicsPage.value + 1)
   } else if (activeFilter.value === 'comentarios' && hasMoreComments.value) {
@@ -306,6 +328,8 @@ const changeFilter = async (filter: FilterType) => {
   activeFilter.value = filter
   if (filter === 'artigos' && articles.value.length === 0) {
     await fetchArticles(0, true)
+  } else if (filter === 'rascunhos' && drafts.value.length === 0) {
+    await fetchDrafts(0, true)
   } else if (filter === 'topicos' && topics.value.length === 0) {
     await fetchTopics(0, true)
   } else if (filter === 'comentarios' && comments.value.length === 0) {
@@ -317,6 +341,8 @@ const changeSort = async (sort: SortType) => {
   currentSort.value = sort
   if (activeFilter.value === 'artigos') {
     await fetchArticles(0, true)
+  } else if (activeFilter.value === 'rascunhos') {
+    await fetchDrafts(0, true)
   } else if (activeFilter.value === 'topicos') {
     await fetchTopics(0, true)
   } else if (activeFilter.value === 'comentarios') {
@@ -326,6 +352,7 @@ const changeSort = async (sort: SortType) => {
 
 const hasMore = computed(() => {
   if (activeFilter.value === 'artigos') return hasMoreArticles.value
+  if (activeFilter.value === 'rascunhos') return hasMoreDrafts.value
   if (activeFilter.value === 'topicos') return hasMoreTopics.value
   if (activeFilter.value === 'comentarios') return hasMoreComments.value
   return false
@@ -351,14 +378,22 @@ watch(sentinel, (el) => {
   }
 })
 
-const filters = [
-  { key: 'artigos' as FilterType, label: 'Artigos' },
-  { key: 'topicos' as FilterType, label: 'Topicos' },
-  { key: 'comentarios' as FilterType, label: 'Comentarios' }
-]
+const filters = computed(() => {
+  const baseFilters = [
+    { key: 'artigos' as FilterType, label: 'Artigos' },
+    { key: 'topicos' as FilterType, label: 'Topicos' },
+    { key: 'comentarios' as FilterType, label: 'Comentarios' }
+  ]
+  if (isOwnProfile.value) {
+    baseFilters.splice(1, 0, { key: 'rascunhos' as FilterType, label: 'Nao publicados' })
+  }
+  return baseFilters
+})
 
 const articlesLeft = computed(() => articles.value.filter((_, i) => i % 2 === 0))
 const articlesRight = computed(() => articles.value.filter((_, i) => i % 2 === 1))
+const draftsLeft = computed(() => drafts.value.filter((_, i) => i % 2 === 0))
+const draftsRight = computed(() => drafts.value.filter((_, i) => i % 2 === 1))
 const topicsLeft = computed(() => topics.value.filter((_, i) => i % 2 === 0))
 const topicsRight = computed(() => topics.value.filter((_, i) => i % 2 === 1))
 const commentsLeft = computed(() => comments.value.filter((_, i) => i % 2 === 0))
@@ -723,6 +758,82 @@ onUnmounted(() => {
                         isLiked: article.isLiked,
                         isDisliked: article.isDisliked,
                         isSaved: article.isSaved
+                      }"
+                    />
+                  </NuxtLink>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <template v-else-if="activeFilter === 'rascunhos'">
+            <div v-if="drafts.length === 0" class="text-center py-12 text-slate-400">
+              Nenhum rascunho salvo ainda.
+            </div>
+            <div v-else class="flex flex-col md:flex-row gap-6">
+              <div class="flex-1 space-y-6">
+                <div v-for="draft in draftsLeft" :key="draft.id" class="relative group">
+                  <button
+                    type="button"
+                    @click.prevent.stop="openDeleteModal(draft.id, 'artigo', draft.title)"
+                    class="absolute top-3 right-3 z-10 p-2 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                    title="Deletar rascunho"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                  <NuxtLink :to="`/artigo/editar/${draft.id}`" class="block">
+                    <ArticleCard
+                      :article="{
+                        id: draft.id,
+                        title: draft.title,
+                        excerpt: draft.description,
+                        tags: draft.tags || [],
+                        author: { name: draft.authorName, userName: draft.authorUserName, avatar: profile?.profileImageUrl || undefined },
+                        date: draft.creationDate,
+                        likes: draft.likesCount,
+                        dislikes: draft.dislikesCount,
+                        comments: draft.commentsCount,
+                        saves: draft.savesCount,
+                        coverImage: draft.coverImage,
+                        isLiked: draft.isLiked,
+                        isDisliked: draft.isDisliked,
+                        isSaved: draft.isSaved
+                      }"
+                    />
+                  </NuxtLink>
+                </div>
+              </div>
+              <div class="flex-1 space-y-6">
+                <div v-for="draft in draftsRight" :key="draft.id" class="relative group">
+                  <button
+                    type="button"
+                    @click.prevent.stop="openDeleteModal(draft.id, 'artigo', draft.title)"
+                    class="absolute top-3 right-3 z-10 p-2 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                    title="Deletar rascunho"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                  <NuxtLink :to="`/artigo/editar/${draft.id}`" class="block">
+                    <ArticleCard
+                      :article="{
+                        id: draft.id,
+                        title: draft.title,
+                        excerpt: draft.description,
+                        tags: draft.tags || [],
+                        author: { name: draft.authorName, userName: draft.authorUserName, avatar: profile?.profileImageUrl || undefined },
+                        date: draft.creationDate,
+                        likes: draft.likesCount,
+                        dislikes: draft.dislikesCount,
+                        comments: draft.commentsCount,
+                        saves: draft.savesCount,
+                        coverImage: draft.coverImage,
+                        isLiked: draft.isLiked,
+                        isDisliked: draft.isDisliked,
+                        isSaved: draft.isSaved
                       }"
                     />
                   </NuxtLink>
