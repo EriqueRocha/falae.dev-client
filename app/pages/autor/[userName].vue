@@ -381,11 +381,11 @@ watch(sentinel, (el) => {
 const filters = computed(() => {
   const baseFilters = [
     { key: 'artigos' as FilterType, label: 'Artigos' },
-    { key: 'topicos' as FilterType, label: 'Topicos' },
-    { key: 'comentarios' as FilterType, label: 'Comentarios' }
+    { key: 'topicos' as FilterType, label: 'Tópicos' },
+    { key: 'comentarios' as FilterType, label: 'Comentários' }
   ]
   if (isOwnProfile.value) {
-    baseFilters.splice(1, 0, { key: 'rascunhos' as FilterType, label: 'Nao publicados' })
+    baseFilters.splice(1, 0, { key: 'rascunhos' as FilterType, label: 'Não publicados' })
   }
   return baseFilters
 })
