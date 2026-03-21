@@ -379,7 +379,11 @@ const handleSubmit = async () => {
     await new Promise(resolve => setTimeout(resolve, 2000))
     saveProgress.value = 'Salvo!'
 
-    navigateTo(`/artigo/${article.value?.authorUserName}/${toSlug(title.value)}`)
+    if (isPrivate.value) {
+      navigateTo(`/autor/${article.value?.authorUserName}`)
+    } else {
+      navigateTo(`/artigo/${article.value?.authorUserName}/${toSlug(title.value)}`)
+    }
   } catch (e: any) {
     console.error('Erro ao salvar:', e)
     error.value = e?.data?.message || e?.message || 'Erro ao salvar artigo'
