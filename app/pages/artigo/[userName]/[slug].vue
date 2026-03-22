@@ -485,7 +485,16 @@ watch(articleContent, async () => {
 }
 
 .article-content :deep(img) {
-  @apply rounded-lg my-4 max-w-full h-auto;
+  @apply rounded-lg my-4 h-auto;
+  max-width: 100%;
+}
+
+/* Em mobile, imagens ocupam largura total para melhor visualizacao */
+@media (max-width: 640px) {
+  .article-content :deep(img) {
+    width: 100% !important;
+    max-width: 100%;
+  }
 }
 
 /* Video embeds (iframe, video, embed, object) */

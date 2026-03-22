@@ -7,8 +7,8 @@ import { Underline } from '@tiptap/extension-underline'
 import { Highlight } from '@tiptap/extension-highlight'
 import { TextAlign } from '@tiptap/extension-text-align'
 import { Link } from '@tiptap/extension-link'
-import { Image } from '@tiptap/extension-image'
 import { Youtube } from '@tiptap/extension-youtube'
+import { ResizableImageExtension } from '~/extensions/ResizableImageExtension'
 import { Table } from '@tiptap/extension-table'
 import { TableRow } from '@tiptap/extension-table-row'
 import { TableCell } from '@tiptap/extension-table-cell'
@@ -237,11 +237,7 @@ const editor = useEditor({
         class: 'editor-link',
       },
     }),
-    Image.configure({
-      HTMLAttributes: {
-        class: 'editor-image',
-      },
-    }),
+    ResizableImageExtension,
     Youtube.configure({
       controls: true,
       nocookie: true,
@@ -1425,16 +1421,9 @@ defineExpose({
   color: rgb(191 219 254);
 }
 
-.tiptap-editor :deep(.tiptap img),
-.tiptap-editor :deep(.tiptap .editor-image) {
-  max-width: 100%;
-  height: auto;
-  border-radius: 0.375rem;
-  margin: 1rem 0;
-}
-
-.tiptap-editor :deep(.tiptap img.ProseMirror-selectednode) {
-  outline: 3px solid rgb(59 130 246);
+/* Estilos de imagem agora no ResizableImageNodeView.vue */
+.tiptap-editor :deep(.tiptap .resizable-image-wrapper) {
+  display: block;
 }
 
 .tiptap-editor :deep(.tiptap mark) {

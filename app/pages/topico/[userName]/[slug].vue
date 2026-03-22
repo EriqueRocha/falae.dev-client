@@ -376,7 +376,15 @@ watch(renderedContent, async () => {
 }
 
 .topic-content :deep(img) {
-  @apply rounded-lg my-4 max-w-full h-auto;
+  @apply rounded-lg my-4 h-auto;
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .topic-content :deep(img) {
+    width: 100% !important;
+    max-width: 100%;
+  }
 }
 
 /* Video embeds (iframe, video, embed, object) */
