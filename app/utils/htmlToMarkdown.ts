@@ -35,7 +35,6 @@ function getTurndownService(): TurndownService {
         const img = node as HTMLImageElement
         const alt = img.alt || ''
         const src = img.src || ''
-        const title = img.title ? ` "${img.title}"` : ''
 
         const youtubeMatch = alt.match(/^youtube:([a-zA-Z0-9_-]+)$/)
         if (youtubeMatch) {
@@ -43,7 +42,13 @@ function getTurndownService(): TurndownService {
           return `\n[![Assista no YouTube](https://img.youtube.com/vi/${videoId}/0.jpg)](https://www.youtube.com/watch?v=${videoId})\n`
         }
 
-        return `![${alt}](${src}${title})`
+        //sempre usa HTML inline para garantir consistencia na renderizacao
+        const dataWidth = img.getAttribute('data-width')
+        const styleMatch = img.style.width?.match(/(\d+)%/)
+        const width = dataWidth ? parseInt(dataWidth, 10) : (styleMatch ? parseInt(styleMatch[1], 10) : 100)
+
+        const titleAttr = img.title ? ` title="${img.title}"` : ''
+        return `\n<img src="${src}" alt="${alt}"${titleAttr} data-width="${width}" style="width: ${width}%; max-width: 100%;" />\n`
       }
     })
 
