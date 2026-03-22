@@ -41,12 +41,10 @@ export const ResizableImageExtension = Node.create<ResizableImageOptions>({
       width: {
         default: 100,
         parseHTML: element => {
-          // Tenta pegar do data-width primeiro
           const dataWidth = element.getAttribute('data-width')
           if (dataWidth) {
             return parseInt(dataWidth, 10)
           }
-          // Fallback: tenta extrair do style inline
           const style = element.getAttribute('style') || ''
           const widthMatch = style.match(/width:\s*(\d+)%/)
           if (widthMatch) {

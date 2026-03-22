@@ -1421,7 +1421,7 @@ defineExpose({
   color: rgb(191 219 254);
 }
 
-/* Estilos de imagem agora no ResizableImageNodeView.vue */
+/*Estilos de imagem agora no ResizableImageNodeView.vue */
 .tiptap-editor :deep(.tiptap .resizable-image-wrapper) {
   display: block;
 }

@@ -489,7 +489,7 @@ watch(articleContent, async () => {
   max-width: 100%;
 }
 
-/* Em mobile, imagens ocupam largura total para melhor visualizacao */
+/*Em celular, imagens ocupam largura total para melhor visualizacao */
 @media (max-width: 640px) {
   .article-content :deep(img) {
     width: 100% !important;
