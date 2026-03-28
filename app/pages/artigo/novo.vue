@@ -95,7 +95,7 @@ const removeCover = () => {
   coverPreview.value = null
 }
 
-const validateForm = (): boolean => {
+const validateForm = (checkMinContent = true): boolean => {
   error.value = ''
 
   if (!title.value.trim()) {
@@ -123,18 +123,20 @@ const validateForm = (): boolean => {
     return false
   }
 
-  const contentToValidate = editorRef.value?.getContent() ?? editorContent.value
-  const textContent = contentToValidate.replace(/<[^>]*>/g, '').trim()
-  if (textContent.length < MIN_CONTENT_LENGTH) {
-    error.value = `O conteúdo do artigo deve ter no mínimo ${MIN_CONTENT_LENGTH} caracteres.`
-    return false
+  if (checkMinContent) {
+    const contentToValidate = editorRef.value?.getContent() ?? editorContent.value
+    const textContent = contentToValidate.replace(/<[^>]*>/g, '').trim()
+    if (textContent.length < MIN_CONTENT_LENGTH) {
+      error.value = `O conteúdo do artigo deve ter no mínimo ${MIN_CONTENT_LENGTH} caracteres.`
+      return false
+    }
   }
 
   return true
 }
 
 const handleSubmit = async (isPrivate = false) => {
-  if (!validateForm()) return
+  if (!validateForm(!isPrivate)) return
 
   const isMarkdown = editorRef.value?.getIsMarkdownMode() ?? false
   const contentToPublish = editorRef.value?.getContent() ?? editorContent.value

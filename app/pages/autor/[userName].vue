@@ -450,6 +450,7 @@ const handleDelete = async () => {
     switch (deleteItemType.value) {
       case 'artigo':
         articles.value = articles.value.filter(a => a.id !== deleteItemId.value)
+        drafts.value = drafts.value.filter(d => d.id !== deleteItemId.value)
         if (profile.value) profile.value.articleCount--
         break
       case 'topico':
@@ -663,12 +664,12 @@ onUnmounted(() => {
 
         <section>
           <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2">
               <button
                 v-for="filter in filters"
                 :key="filter.key"
                 @click="changeFilter(filter.key)"
-                class="px-4 py-2 rounded-lg font-medium transition-colors"
+                class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-colors text-sm sm:text-base"
                 :class="activeFilter === filter.key
                   ? 'bg-blue-600 text-white'
                   : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'"

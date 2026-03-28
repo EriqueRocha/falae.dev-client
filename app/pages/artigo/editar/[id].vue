@@ -305,13 +305,6 @@ const handleSubmit = async () => {
     return
   }
 
-  const contentToValidate = editorRef.value?.getContent() ?? editorContent.value
-  const textContent = contentToValidate.replace(/<[^>]*>/g, '').trim()
-  if (textContent.length < MIN_CONTENT_LENGTH) {
-    error.value = `O conteúdo do artigo deve ter no mínimo ${MIN_CONTENT_LENGTH} caracteres. Atualmente: ${textContent.length}`
-    return
-  }
-
   isSaving.value = true
 
   try {
@@ -695,7 +688,7 @@ onBeforeUnmount(() => {
 
           <div class="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 pt-4">
             <NuxtLink
-              :to="article ? `/artigo/${article.authorUserName}/${article.slug}` : '/'"
+              :to="article ? (isPrivate ? `/autor/${article.authorUserName}` : `/artigo/${article.authorUserName}/${article.slug}`) : '/'"
               class="px-4 sm:px-6 py-2.5 sm:py-3 bg-slate-700 hover:bg-slate-600 text-white text-sm sm:text-base text-center rounded-lg transition-colors"
             >
               Cancelar
