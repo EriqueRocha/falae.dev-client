@@ -184,7 +184,9 @@ const fetchArticle = async () => {
     }
 
     if (data.urlArticleContent) {
-      const contentResponse = await fetch(data.urlArticleContent)
+      const contentResponse = await fetch(data.urlArticleContent, {
+        cache: 'no-store'
+      })
       const rawContent = await contentResponse.text()
 
       let htmlContent: string

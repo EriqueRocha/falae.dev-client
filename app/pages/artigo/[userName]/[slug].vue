@@ -74,7 +74,9 @@ const fetchArticle = async () => {
     commentsCount.value = data.commentsCount
 
     if (data.urlArticleContent) {
-      const contentResponse = await fetch(data.urlArticleContent)
+      const contentResponse = await fetch(data.urlArticleContent, {
+        cache: 'no-store'
+      })
       const rawContent = await contentResponse.text()
 
       if (data.isMarkdown) {
