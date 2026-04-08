@@ -11,6 +11,7 @@ const apiBase = config.public.apiBase
 const { user } = useAuth()
 const { renderMermaidInContainer } = useMermaidRender()
 const { highlightCodeInContainer } = useSyntaxHighlight()
+const requestURL = useRequestURL()
 
 const articleContentRef = ref<HTMLElement | null>(null)
 
@@ -38,63 +39,103 @@ interface Article {
   isSaved: boolean
 }
 
-const article = ref<Article | null>(null)
 const articleContent = ref<string>('')
-const loading = ref(true)
-const error = ref('')
-const isLiked = ref(false)
-const isDisliked = ref(false)
-const isSaved = ref(false)
-const likesCount = ref(0)
-const dislikesCount = ref(0)
-const savesCount = ref(0)
-const commentsCount = ref(0)
 const descriptionExpanded = ref(false)
 
 const userName = computed(() => route.params.userName as string)
 const slug = computed(() => route.params.slug as string)
 const highlightCommentId = computed(() => route.query.commentId as string | undefined)
 
-const fetchArticle = async () => {
-  loading.value = true
-  error.value = ''
+const {
+  data: article,
+  pending: loading,
+  error: fetchError,
+} = await useAsyncData<Article>(
+  `article-${userName.value}-${slug.value}`,
+  () =>
+    $fetch<Article>(`${apiBase}/article/${userName.value}/${slug.value}`, {
+      credentials: 'include',
+    }),
+  { watch: [userName, slug] },
+)
 
-  try {
-    const data = await $fetch<Article>(`${apiBase}/article/${userName.value}/${slug.value}`, {
-      credentials: 'include'
-    })
+const error = computed(() => {
+  if (!fetchError.value) return ''
+  return (fetchError.value as any)?.statusCode === 404
+    ? 'Artigo nao encontrado'
+    : 'Erro ao carregar artigo'
+})
 
-    article.value = data
-    isLiked.value = data.isLiked
-    isDisliked.value = data.isDisliked
-    isSaved.value = data.isSaved
-    likesCount.value = data.likesCount
-    dislikesCount.value = data.dislikesCount
-    savesCount.value = data.savesCount
-    commentsCount.value = data.commentsCount
+const isLiked = ref(article.value?.isLiked ?? false)
+const isDisliked = ref(article.value?.isDisliked ?? false)
+const isSaved = ref(article.value?.isSaved ?? false)
+const likesCount = ref(article.value?.likesCount ?? 0)
+const dislikesCount = ref(article.value?.dislikesCount ?? 0)
+const savesCount = ref(article.value?.savesCount ?? 0)
+const commentsCount = ref(article.value?.commentsCount ?? 0)
 
-    if (data.urlArticleContent) {
-      const contentResponse = await fetch(data.urlArticleContent, {
-        cache: 'no-store'
-      })
-      const rawContent = await contentResponse.text()
+watch(article, (data) => {
+  if (!data) return
+  isLiked.value = data.isLiked
+  isDisliked.value = data.isDisliked
+  isSaved.value = data.isSaved
+  likesCount.value = data.likesCount
+  dislikesCount.value = data.dislikesCount
+  savesCount.value = data.savesCount
+  commentsCount.value = data.commentsCount
+})
 
-      if (data.isMarkdown) {
-        articleContent.value = markdownToHtml(rawContent)
-      } else {
-        articleContent.value = renderLatexInHtml(rawContent)
-      }
-    }
-  } catch (e: any) {
-    if (e?.statusCode === 404) {
-      error.value = 'Artigo nao encontrado'
-    } else {
-      error.value = 'Erro ao carregar artigo'
-    }
-  } finally {
-    loading.value = false
-  }
+//SEO/Open Graph
+const ogImageUrl = computed(() => {
+  if (!article.value) return ''
+  if (article.value.coverImage) return article.value.coverImage
+  const params = new URLSearchParams({
+    title: article.value.title,
+    author: article.value.authorName,
+    initials: article.value.authorName.charAt(0).toUpperCase(),
+    g: String(article.value.authorName.charCodeAt(0) % 5),
+  })
+  return `${requestURL.origin}/api/og-image?${params}`
+})
+
+const ogUrl = computed(
+  () => `${requestURL.origin}/artigo/${userName.value}/${slug.value}`,
+)
+
+useSeoMeta({
+  title: () => article.value?.title ?? 'Falae.dev',
+  ogTitle: () => article.value?.title ?? 'Falae.dev',
+  ogDescription: () => article.value?.description ?? '',
+  ogImage: () => ogImageUrl.value,
+  ogUrl: () => ogUrl.value,
+  ogType: 'article',
+  twitterCard: 'summary_large_image',
+  twitterTitle: () => article.value?.title ?? 'Falae.dev',
+  twitterImage: () => ogImageUrl.value,
+})
+
+useHead({
+  meta: [
+    { property: 'og:site_name', content: 'Falae.dev' },
+    { property: 'article:author', content: () => article.value?.authorName ?? '' },
+  ],
+})
+
+const loadContent = async (data: Article) => {
+  if (!data.urlArticleContent) return
+  const contentResponse = await fetch(data.urlArticleContent, { cache: 'no-store' })
+  const rawContent = await contentResponse.text()
+  articleContent.value = data.isMarkdown
+    ? markdownToHtml(rawContent)
+    : renderLatexInHtml(rawContent)
 }
+
+watch(
+  article,
+  (data) => { if (data) loadContent(data) },
+  { immediate: false },
+)
+
 
 const toggleLike = async () => {
   if (!article.value) return
@@ -204,7 +245,7 @@ const isOwner = computed(() => {
 })
 
 onMounted(() => {
-  fetchArticle()
+  if (article.value) loadContent(article.value)
 })
 
 watch(articleContent, async () => {
