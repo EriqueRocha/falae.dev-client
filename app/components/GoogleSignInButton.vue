@@ -29,6 +29,24 @@ const handleCredentialResponse = async (response: { credential: string }) => {
   }
 }
 
+const getElementWidth = (el: HTMLElement): Promise<number> => {
+  return new Promise((resolve) => {
+    const width = el.offsetWidth
+    if (width > 0) {
+      resolve(width)
+      return
+    }
+    const observer = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect.width
+      if (w > 0) {
+        observer.disconnect()
+        resolve(w)
+      }
+    })
+    observer.observe(el)
+  })
+}
+
 onMounted(async () => {
   try {
     if (!window.google?.accounts) {
@@ -42,6 +60,8 @@ onMounted(async () => {
         document.head.appendChild(script)
       })
     }
+
+    const width = await getElementWidth(googleButtonRef.value!)
 
     window.google.accounts.id.initialize({
       client_id: config.public.googleClientId,
@@ -57,7 +77,7 @@ onMounted(async () => {
         size: 'large',
         text: 'continue_with',
         shape: 'rectangular',
-        width: googleButtonRef.value?.offsetWidth || 400,
+        width,
         locale: 'pt-BR',
       }
     )
@@ -90,6 +110,6 @@ declare global {
       <div class="w-5 h-5 border-2 border-gray-400 border-t-gray-800 rounded-full animate-spin"></div>
       Entrando...
     </div>
-    <div v-else ref="googleButtonRef" class="w-full flex justify-center [&>div]:w-full [&_iframe]:!w-full"></div>
+    <div v-else ref="googleButtonRef" class="w-full flex justify-center"></div>
   </div>
 </template>
