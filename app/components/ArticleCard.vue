@@ -23,7 +23,7 @@ interface Article {
   isSaved?: boolean
 }
 
-defineProps<{
+const props = defineProps<{
   article: Article
 }>()
 
@@ -37,10 +37,13 @@ const gradientStyles: Record<string, string> = {
 
 const defaultGradients = Object.keys(gradientStyles)
 
-const getGradientStyle = (gradient?: string): string => {
-  const key = gradient ?? defaultGradients[Math.floor(Math.random() * defaultGradients.length)]
-  return gradientStyles[key] ?? gradientStyles[defaultGradients[0]]
-}
+const gradientStyle = (() => {
+  if (props.article.gradient && gradientStyles[props.article.gradient]) {
+    return gradientStyles[props.article.gradient]
+  }
+  const key = defaultGradients[Math.floor(Math.random() * defaultGradients.length)]
+  return gradientStyles[key]
+})()
 </script>
 
 <template>
@@ -54,7 +57,7 @@ const getGradientStyle = (gradient?: string): string => {
     <div
       v-else
       class="h-32 relative p-6 flex flex-col justify-between"
-      :style="{ background: getGradientStyle(article.gradient) }"
+      :style="{ background: gradientStyle }"
     >
       <div class="flex justify-between items-start">
         <div class="flex-1 min-w-0 pr-3">
