@@ -41,6 +41,8 @@ interface Article {
 
 const articleContent = ref<string>('')
 const descriptionExpanded = ref(false)
+const descriptionRef = ref<HTMLElement | null>(null)
+const descriptionOverflows = ref(false)
 
 const userName = computed(() => route.params.userName as string)
 const slug = computed(() => route.params.slug as string)
@@ -83,6 +85,16 @@ watch(article, (data) => {
   dislikesCount.value = data.dislikesCount
   savesCount.value = data.savesCount
   commentsCount.value = data.commentsCount
+})
+
+watch(descriptionRef, (el) => {
+  if (!el) {
+    descriptionOverflows.value = false
+    return
+  }
+  requestAnimationFrame(() => {
+    descriptionOverflows.value = el.scrollHeight > el.clientHeight
+  })
 })
 
 //SEO/Open Graph
@@ -285,12 +297,14 @@ watch(articleContent, async () => {
 
           <div class="mb-6">
             <p
+              ref="descriptionRef"
               class="text-slate-400 text-lg"
               :class="{ 'line-clamp-2 sm:line-clamp-none': !descriptionExpanded }"
             >
               {{ article.description }}
             </p>
             <button
+              v-if="descriptionOverflows"
               @click="descriptionExpanded = !descriptionExpanded"
               class="sm:hidden flex items-center gap-1 text-blue-400 text-sm mt-2"
             >
