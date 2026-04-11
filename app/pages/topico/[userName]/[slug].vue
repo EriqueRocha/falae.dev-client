@@ -214,7 +214,7 @@ watch(renderedContent, async () => {
             <NuxtLink
               v-for="tag in topic.tags"
               :key="tag"
-              :to="`/busca?q=__TAG__${tag}`"
+              :to="`/busca?q=${tag}`"
               class="px-2 py-0.5 sm:px-3 sm:py-1 bg-purple-600/20 text-purple-400 rounded-full text-xs sm:text-sm hover:bg-purple-600/30 transition-colors"
             >
               #{{ tag }}
