@@ -368,6 +368,7 @@ watch(() => props.highlightPath, (newPath) => {
 
         <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs">
           <button
+            v-if="!comment.deleted"
             @click="toggleLike"
             class="flex items-center gap-1 transition-colors"
             :class="isLiked ? 'text-green-400' : 'text-slate-500 hover:text-green-400'"
@@ -380,6 +381,7 @@ watch(() => props.highlightPath, (newPath) => {
           </button>
 
           <button
+            v-if="!comment.deleted"
             @click="toggleDislike"
             class="flex items-center gap-1 transition-colors"
             :class="isDisliked ? 'text-red-400' : 'text-slate-500 hover:text-red-400'"
