@@ -6,8 +6,7 @@ const apiBase = config.public.apiBase
 
 const decodeSearchQuery = (q: string | null) => {
   if (!q) return ''
-  //restaurar # que foi substituído por __TAG__
-  return q.replace(/__TAG__/g, '#')
+  return q
 }
 
 const getQueryFromUrl = () => {
@@ -67,21 +66,11 @@ const loadingMore = ref<'article' | 'topic' | 'tag' | null>(null)
 const activeTab = ref<'all' | 'articles' | 'topics' | 'tags'>('all')
 
 const parseSearchQuery = (query: string) => {
-  const words = query.split(/\s+/)
-  const tags: string[] = []
-  const titleWords: string[] = []
-
-  for (const word of words) {
-    if (word.startsWith('#') && word.length > 1) {
-      tags.push(word.slice(1))
-    } else if (word.trim()) {
-      titleWords.push(word)
-    }
-  }
+  const words = query.split(/\s+/).filter(w => w.trim())
 
   return {
-    titleQuery: titleWords.join(' ').trim(),
-    tags
+    titleQuery: query.trim(),
+    tags: words
   }
 }
 
@@ -199,9 +188,7 @@ const loadMore = async (type: 'article' | 'topic' | 'tag') => {
 }
 
 const handleSearch = () => {
-  //substituir # por __TAG__ para evitar problemas com hash na URL
-  const safeQuery = searchQuery.value.replace(/#/g, '__TAG__')
-  router.replace({ path: '/busca', query: { q: safeQuery } })
+  router.replace({ path: '/busca', query: { q: searchQuery.value.trim() } })
   performSearch()
 }
 
@@ -257,7 +244,7 @@ useHead({
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="Pesquisar artigos, tópicos ou use #tags para buscar por tags..."
+            placeholder="Pesquisar artigos, tópicos e tags..."
             class="w-full bg-slate-800 text-slate-200 placeholder-slate-500 rounded-xl px-5 py-4 pl-12 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             @keydown.enter="handleSearch"
           />
@@ -294,15 +281,8 @@ useHead({
 
         <div v-if="searchQuery.trim()" class="mt-3 flex flex-wrap items-center gap-2 text-sm">
           <span class="text-slate-400">Buscando:</span>
-          <span v-if="parsedQuery.titleQuery" class="bg-slate-800 text-slate-300 px-2 py-1 rounded">
+          <span class="bg-slate-800 text-slate-300 px-2 py-1 rounded">
             "{{ parsedQuery.titleQuery }}"
-          </span>
-          <span
-            v-for="tag in parsedQuery.tags"
-            :key="tag"
-            class="bg-blue-500/20 text-blue-400 px-2 py-1 rounded"
-          >
-            #{{ tag }}
           </span>
         </div>
       </div>
@@ -346,7 +326,7 @@ useHead({
             <span v-if="topicResults.length" class="ml-1 text-xs opacity-70">({{ topicResults.length }})</span>
           </button>
           <button
-            v-if="parsedQuery.tags.length > 0"
+            v-if="searchQuery.trim()"
             @click="activeTab = 'tags'"
             class="px-4 py-3 text-sm font-medium transition-colors border-b-2"
             :class="activeTab === 'tags'
@@ -370,7 +350,7 @@ useHead({
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <h2 class="text-xl text-slate-400 mb-2">Digite algo para buscar</h2>
-        <p class="text-slate-500">Use #tags para buscar por tags específicas</p>
+        <p class="text-slate-500">A busca encontra artigos, tópicos e tags automaticamente</p>
       </div>
 
       <div v-else-if="!hasResults && !isSearching" class="text-center py-12">

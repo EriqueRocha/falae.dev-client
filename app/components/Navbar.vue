@@ -53,21 +53,11 @@ const mobileSearchInputRef = ref<HTMLInputElement | null>(null)
 let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
 const parseSearchQuery = (query: string) => {
-  const words = query.split(/\s+/)
-  const tags: string[] = []
-  const titleWords: string[] = []
-
-  for (const word of words) {
-    if (word.startsWith('#') && word.length > 1) {
-      tags.push(word.slice(1))
-    } else if (word.trim()) {
-      titleWords.push(word)
-    }
-  }
+  const words = query.split(/\s+/).filter(w => w.trim())
 
   return {
-    titleQuery: titleWords.join(' ').trim(),
-    tags
+    titleQuery: query.trim(),
+    tags: words
   }
 }
 
@@ -185,9 +175,9 @@ const clearSearch = () => {
 
 const goToSearchPage = () => {
   if (searchQuery.value.trim()) {
-    const safeQuery = searchQuery.value.replace(/#/g, '__TAG__')
+    const query = searchQuery.value.trim()
     clearSearch()
-    router.push({ path: '/busca', query: { q: safeQuery } })
+    router.push({ path: '/busca', query: { q: query } })
   }
 }
 
@@ -301,7 +291,7 @@ onUnmounted(() => {
             ref="searchInputRef"
             v-model="searchQuery"
             type="text"
-            placeholder="Pesquisar... #tags"
+            placeholder="Pesquisar..."
             class="bg-slate-800 text-slate-300 placeholder-slate-500 rounded-full px-4 py-2 pl-10 w-48 lg:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
             @input="debouncedSearch"
             @focus="searchQuery.trim() && hasResults && (showResults = true)"
@@ -570,7 +560,7 @@ onUnmounted(() => {
           ref="mobileSearchInputRef"
           v-model="searchQuery"
           type="text"
-          placeholder="Pesquisar... #tags"
+          placeholder="Pesquisar..."
           class="w-full bg-slate-800 text-slate-300 placeholder-slate-500 rounded-full px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
           @input="debouncedSearch"
           @focus="searchQuery.trim() && hasResults && (showResults = true)"
