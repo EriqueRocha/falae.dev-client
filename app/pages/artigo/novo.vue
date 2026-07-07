@@ -27,7 +27,7 @@ watchEffect(() => {
 
 const MAX_TAGS = 10
 const MAX_TAG_LENGTH = 50
-const MIN_CONTENT_LENGTH = 4500
+const MIN_CONTENT_LENGTH = 3000
 
 const addTag = () => {
   let tag = tagInput.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '')
