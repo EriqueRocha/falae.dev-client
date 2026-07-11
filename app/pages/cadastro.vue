@@ -1,4 +1,9 @@
 <script setup lang="ts">
+useSeoMeta({
+  title: 'Criar conta · Falae.dev',
+  description: 'Crie sua conta no Falae.dev e participe da comunidade.',
+})
+
 const { register, isAuthenticated } = useAuth()
 
 const name = ref('')
@@ -82,7 +87,7 @@ const handleSubmit = async () => {
       <p class="text-slate-500 text-sm">Redirecionando...</p>
     </div>
 
-    <div v-else class="w-full max-w-md bg-slate-900 rounded-xl p-8 border border-slate-800">
+    <div v-else class="w-full max-w-md bg-slate-900 rounded-2xl p-8 border border-slate-800 shadow-2xl shadow-black/40">
       <h1 class="text-2xl font-bold text-white text-center mb-8">Cadastrar</h1>
 
       <div class="space-y-4 mb-6">
@@ -96,49 +101,83 @@ const handleSubmit = async () => {
       </div>
 
       <form @submit.prevent="handleSubmit" class="space-y-4">
-        <div v-if="error" class="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded-lg text-sm">
+        <div v-if="error" role="alert" class="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded-lg text-sm">
           {{ error }}
         </div>
 
-        <input
-          v-model="name"
-          type="text"
-          placeholder="Nome"
-          class="w-full bg-slate-800 text-white placeholder-slate-500 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div>
+          <label for="signup-name" class="sr-only">Nome</label>
+          <input
+            id="signup-name"
+            v-model="name"
+            type="text"
+            name="name"
+            autocomplete="name"
+            placeholder="Nome"
+            class="w-full bg-slate-800 text-white placeholder-slate-500 border border-slate-700/60 rounded-lg px-4 py-3 transition-colors focus:outline-none focus:border-transparent focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-        <input
-          v-model="username"
-          type="text"
-          placeholder="Nome de usuário ( letras min, numeros e - )"
-          class="w-full bg-slate-800 text-white placeholder-slate-500 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div>
+          <label for="signup-username" class="sr-only">Nome de usuário</label>
+          <input
+            id="signup-username"
+            v-model="username"
+            type="text"
+            name="username"
+            autocomplete="username"
+            autocapitalize="none"
+            autocorrect="off"
+            spellcheck="false"
+            placeholder="Nome de usuário ( letras min, numeros e - )"
+            class="w-full bg-slate-800 text-white placeholder-slate-500 border border-slate-700/60 rounded-lg px-4 py-3 transition-colors focus:outline-none focus:border-transparent focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-        <input
-          v-model="email"
-          type="email"
-          placeholder="Email"
-          class="w-full bg-slate-800 text-white placeholder-slate-500 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div>
+          <label for="signup-email" class="sr-only">Email</label>
+          <input
+            id="signup-email"
+            v-model="email"
+            type="email"
+            name="email"
+            autocomplete="email"
+            inputmode="email"
+            placeholder="Email"
+            class="w-full bg-slate-800 text-white placeholder-slate-500 border border-slate-700/60 rounded-lg px-4 py-3 transition-colors focus:outline-none focus:border-transparent focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-        <input
-          v-model="password"
-          type="password"
-          placeholder="Senha"
-          class="w-full bg-slate-800 text-white placeholder-slate-500 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div>
+          <label for="signup-password" class="sr-only">Senha</label>
+          <input
+            id="signup-password"
+            v-model="password"
+            type="password"
+            name="new-password"
+            autocomplete="new-password"
+            placeholder="Senha"
+            class="w-full bg-slate-800 text-white placeholder-slate-500 border border-slate-700/60 rounded-lg px-4 py-3 transition-colors focus:outline-none focus:border-transparent focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-        <input
-          v-model="confirmPassword"
-          type="password"
-          placeholder="Confirmar senha"
-          class="w-full bg-slate-800 text-white placeholder-slate-500 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div>
+          <label for="signup-confirm-password" class="sr-only">Confirmar senha</label>
+          <input
+            id="signup-confirm-password"
+            v-model="confirmPassword"
+            type="password"
+            name="confirm-password"
+            autocomplete="new-password"
+            placeholder="Confirmar senha"
+            class="w-full bg-slate-800 text-white placeholder-slate-500 border border-slate-700/60 rounded-lg px-4 py-3 transition-colors focus:outline-none focus:border-transparent focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
         <button
           type="submit"
           :disabled="loading"
-          class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white font-medium py-3 rounded-lg transition-colors"
+          class="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white font-medium py-3 rounded-lg shadow-lg shadow-blue-600/20 hover:shadow-blue-500/30 active:scale-[0.99] transition-all"
         >
           {{ loading ? 'Cadastrando...' : 'Cadastrar' }}
         </button>

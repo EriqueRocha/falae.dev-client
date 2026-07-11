@@ -1,7 +1,5 @@
-import { common, createLowlight } from 'lowlight'
+import { lowlight } from '~/utils/lowlight'
 import { toHtml } from 'hast-util-to-html'
-
-const lowlight = createLowlight(common)
 
 /**
  * Composable para syntax highlighting de blocos de codigo

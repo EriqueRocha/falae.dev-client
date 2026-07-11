@@ -5,6 +5,12 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: 'Falae.dev',
+      htmlAttrs: {
+        lang: 'pt-BR'
+      },
+      meta: [
+        { name: 'description', content: 'Comunidade dev para compartilhar artigos, tópicos e discussões sobre tecnologia.' }
+      ]
     }
   },
   modules: ['@nuxtjs/tailwindcss'],

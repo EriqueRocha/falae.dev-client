@@ -373,7 +373,7 @@ useHead({
               v-for="result in articleResults"
               :key="result.id"
               @click="goToArticle(result.authorUserName, result.slug)"
-              class="w-full text-left bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 rounded-xl overflow-hidden transition-all group"
+              class="w-full text-left bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-blue-500/50 rounded-xl overflow-hidden transition-all group"
               :class="result.coverImage ? 'p-0' : 'p-4'"
             >
               <img
@@ -381,6 +381,8 @@ useHead({
                 :src="result.coverImage"
                 :alt="result.title"
                 class="w-full h-32 object-cover"
+                loading="lazy"
+                decoding="async"
               />
               <div :class="result.coverImage ? 'p-4' : ''">
                 <h3 class="text-white font-medium group-hover:text-blue-400 transition-colors line-clamp-2">
@@ -395,6 +397,8 @@ useHead({
                     v-if="result.authorProfileImage"
                     :src="result.authorProfileImage"
                     class="w-4 h-4 rounded-full"
+                    loading="lazy"
+                    decoding="async"
                   />
                   {{ result.authorName }}
                 </span>
@@ -484,7 +488,7 @@ useHead({
               v-for="result in tagResults"
               :key="result.id"
               @click="goToTagResult(result)"
-              class="w-full text-left bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 rounded-xl overflow-hidden transition-all group"
+              class="w-full text-left bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-blue-500/50 rounded-xl overflow-hidden transition-all group"
               :class="result.coverImage ? 'p-0' : 'p-4'"
             >
               <img
@@ -492,6 +496,8 @@ useHead({
                 :src="result.coverImage"
                 :alt="result.title || 'Capa'"
                 class="w-full h-32 object-cover"
+                loading="lazy"
+                decoding="async"
               />
               <div :class="result.coverImage ? 'p-4' : ''">
                 <div class="flex items-center gap-2 mb-2">
@@ -525,6 +531,8 @@ useHead({
                     v-if="result.authorProfileImage"
                     :src="result.authorProfileImage"
                     class="w-4 h-4 rounded-full"
+                    loading="lazy"
+                    decoding="async"
                   />
                   {{ result.authorName }}
                 </span>

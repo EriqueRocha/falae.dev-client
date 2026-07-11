@@ -70,6 +70,8 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
 }
 
+useModalBehavior(() => props.isOpen, handleKeydown)
+
 const examples = [
   { label: 'Fracao', value: '\\frac{a}{b}' },
   { label: 'Raiz', value: '\\sqrt{x}' },
@@ -92,11 +94,10 @@ const insertExample = (value: string) => {
         v-if="isOpen"
         class="modal-overlay"
         @click.self="handleClose"
-        @keydown="handleKeydown"
       >
-        <div class="modal-content">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="latex-modal-title">
           <div class="modal-header">
-            <h3 class="modal-title">Inserir Formula LaTeX</h3>
+            <h3 id="latex-modal-title" class="modal-title">Inserir Formula LaTeX</h3>
             <button
               type="button"
               class="close-btn"
@@ -181,6 +182,8 @@ const insertExample = (value: string) => {
   justify-content: center;
   z-index: 100;
   backdrop-filter: blur(2px);
+  overflow-y: auto;
+  padding: 1rem;
 }
 
 .modal-content {
@@ -189,8 +192,9 @@ const insertExample = (value: string) => {
   border-radius: 0.75rem;
   width: 100%;
   max-width: 32rem;
-  margin: 1rem;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .modal-header {
@@ -375,12 +379,12 @@ const insertExample = (value: string) => {
 }
 
 .btn-submit {
-  background-color: rgb(59 130 246);
+  background-color: rgb(37 99 235); /* blue-600 */
   color: white;
 }
 
 .btn-submit:hover:not(:disabled) {
-  background-color: rgb(37 99 235);
+  background-color: rgb(59 130 246); /* blue-500 */
 }
 
 .btn-submit:disabled {

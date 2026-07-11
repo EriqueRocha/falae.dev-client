@@ -1,10 +1,9 @@
 import { marked, Renderer } from 'marked'
 import katex from 'katex'
-import { common, createLowlight } from 'lowlight'
+import { lowlight } from '~/utils/lowlight'
 import { toHtml } from 'hast-util-to-html'
 
 let isConfigured = false
-const lowlight = createLowlight(common)
 
 function configureMarked(): void {
   if (isConfigured) return

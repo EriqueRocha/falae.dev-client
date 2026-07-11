@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import mermaid from 'mermaid'
+import { loadMermaid } from '~/utils/loadMermaid'
 
 const props = defineProps<{
   isOpen: boolean
@@ -18,7 +18,6 @@ const previewRef = ref<HTMLDivElement | null>(null)
 const hasError = ref(false)
 const errorMessage = ref('')
 const isRendering = ref(false)
-const isInitialized = ref(false)
 
 const examples = [
   {
@@ -88,7 +87,8 @@ const renderPreview = async () => {
   isRendering.value = true
 
   try {
-    const id = `mermaid-preview-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const mermaid = await loadMermaid()
+    const id = `mermaid-preview-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
     const { svg } = await mermaid.render(id, mermaidInput.value)
     if (previewRef.value) {
       previewRef.value.innerHTML = svg
@@ -117,16 +117,6 @@ watch(mermaidInput, debouncedRenderPreview)
 
 watch(() => props.isOpen, async (isOpen) => {
   if (isOpen) {
-    if (!isInitialized.value) {
-      mermaid.initialize({
-        startOnLoad: false,
-        theme: 'dark',
-        securityLevel: 'loose',
-        suppressErrorRendering: true
-      })
-      isInitialized.value = true
-    }
-
     mermaidInput.value = props.initialContent || ''
     hasError.value = false
     errorMessage.value = ''
@@ -170,6 +160,8 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
 }
 
+useModalBehavior(() => props.isOpen, handleKeydown)
+
 onBeforeUnmount(() => {
   if (debounceTimer) {
     clearTimeout(debounceTimer)
@@ -184,11 +176,10 @@ onBeforeUnmount(() => {
         v-if="isOpen"
         class="modal-overlay"
         @click.self="handleClose"
-        @keydown="handleKeydown"
       >
-        <div class="modal-content">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="mermaid-modal-title">
           <div class="modal-header">
-            <h3 class="modal-title">{{ isEditMode ? 'Editar' : 'Inserir' }} Diagrama Mermaid</h3>
+            <h3 id="mermaid-modal-title" class="modal-title">{{ isEditMode ? 'Editar' : 'Inserir' }} Diagrama Mermaid</h3>
             <button
               type="button"
               class="close-btn"
@@ -280,6 +271,8 @@ onBeforeUnmount(() => {
   justify-content: center;
   z-index: 100;
   backdrop-filter: blur(2px);
+  overflow-y: auto;
+  padding: 1rem;
 }
 
 .modal-content {
@@ -288,7 +281,6 @@ onBeforeUnmount(() => {
   border-radius: 0.75rem;
   width: 100%;
   max-width: 64rem;
-  margin: 1rem;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   max-height: 90vh;
   overflow-y: auto;
@@ -496,12 +488,12 @@ onBeforeUnmount(() => {
 }
 
 .btn-submit {
-  background-color: rgb(59 130 246);
+  background-color: rgb(37 99 235); /* blue-600 */
   color: white;
 }
 
 .btn-submit:hover:not(:disabled) {
-  background-color: rgb(37 99 235);
+  background-color: rgb(59 130 246); /* blue-500 */
 }
 
 .btn-submit:disabled {
