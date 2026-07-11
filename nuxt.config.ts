@@ -20,7 +20,7 @@ export default defineNuxtConfig({
   ],
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://api.falae.dev',
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://test-api.falae.dev',
       googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com'
     }
   }
