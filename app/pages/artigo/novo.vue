@@ -1,4 +1,9 @@
 <script setup lang="ts">
+useSeoMeta({
+  title: 'Novo artigo · Falae.dev',
+  description: 'Escreva e publique um novo artigo.',
+})
+
 const { isAuthenticated, user } = useAuth()
 const { addLocalImage, publish, isPublishing, publishProgress, clearPendingImages } = useArticlePublish()
 
@@ -246,7 +251,8 @@ onBeforeUnmount(() => {
               <button
                 type="button"
                 @click="removeTag(index)"
-                class="hover:text-blue-200 transition-colors"
+                class="p-1.5 -m-1 hover:text-blue-200 transition-colors"
+                :aria-label="`Remover tag ${tag}`"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -280,7 +286,8 @@ onBeforeUnmount(() => {
           <label class="block text-slate-300 text-sm font-medium mb-2">URL do post original</label>
           <input
               v-model="originalPost"
-              type="text"
+              type="url"
+              inputmode="url"
               placeholder="https://www.meuartigo.com"
               class="w-full bg-slate-800 text-white placeholder-slate-500 rounded-lg px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
           />

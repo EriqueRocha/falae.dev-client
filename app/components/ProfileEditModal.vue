@@ -142,6 +142,8 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
 }
 
+useModalBehavior(() => props.isOpen, handleKeydown)
+
 const bioCharCount = computed(() => form.value.bio?.length || 0)
 </script>
 
@@ -152,11 +154,10 @@ const bioCharCount = computed(() => form.value.bio?.length || 0)
         v-if="isOpen"
         class="modal-overlay"
         @click.self="handleClose"
-        @keydown="handleKeydown"
       >
-        <div class="modal-content">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="profile-edit-modal-title">
           <div class="modal-header">
-            <h3 class="modal-title">Editar Perfil</h3>
+            <h3 id="profile-edit-modal-title" class="modal-title">Editar Perfil</h3>
             <button
               type="button"
               class="close-btn"
@@ -238,6 +239,7 @@ const bioCharCount = computed(() => form.value.bio?.length || 0)
                     class="remove-image-btn"
                     @click="removeSelectedImage"
                     title="Remover imagem selecionada"
+                    aria-label="Remover imagem selecionada"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -567,12 +569,12 @@ const bioCharCount = computed(() => form.value.bio?.length || 0)
 }
 
 .btn-submit {
-  background-color: rgb(59 130 246);
+  background-color: rgb(37 99 235); /* blue-600 */
   color: white;
 }
 
 .btn-submit:hover:not(:disabled) {
-  background-color: rgb(37 99 235);
+  background-color: rgb(59 130 246); /* blue-500 */
 }
 
 .btn-submit:disabled {

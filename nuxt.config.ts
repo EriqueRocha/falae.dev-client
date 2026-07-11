@@ -5,6 +5,12 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: 'Falae.dev',
+      htmlAttrs: {
+        lang: 'pt-BR'
+      },
+      meta: [
+        { name: 'description', content: 'Comunidade dev para compartilhar artigos, tópicos e discussões sobre tecnologia.' }
+      ]
     }
   },
   modules: ['@nuxtjs/tailwindcss'],
@@ -14,7 +20,7 @@ export default defineNuxtConfig({
   ],
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://test-api.falae.dev',
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://api.falae.dev',
       googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com'
     }
   }

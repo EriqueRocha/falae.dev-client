@@ -181,6 +181,8 @@ const goToSearchPage = () => {
   }
 }
 
+const profileMenuOpen = ref(false)
+
 const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as HTMLElement
   if (!target.closest('.search-container')) {
@@ -188,6 +190,9 @@ const handleClickOutside = (event: MouseEvent) => {
   }
   if (!target.closest('.notifications-container')) {
     notificationsOpen.value = false
+  }
+  if (!target.closest('.profile-menu-container')) {
+    profileMenuOpen.value = false
   }
 }
 
@@ -279,7 +284,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <nav class="bg-slate-900 border-b border-slate-800 px-4 md:px-6">
+  <nav class="sticky top-0 z-40 bg-slate-900/85 backdrop-blur-lg border-b border-slate-800 px-4 md:px-6">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <NuxtLink to="/" class="flex items-center">
         <img src="~/assets/logo/1000pxwh.png" alt="Falae.dev" class="h-16" />
@@ -320,7 +325,7 @@ onUnmounted(() => {
 
           <div
             v-if="showResults && searchQuery.trim()"
-            class="absolute top-full left-0 right-0 mt-2 bg-slate-800 rounded-lg shadow-lg border border-slate-700 overflow-hidden z-50 max-h-96 overflow-y-auto"
+            class="absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-700/60 rounded-lg shadow-xl shadow-black/40 border border-slate-700 overflow-hidden z-50 max-h-96 overflow-y-auto"
           >
             <button
               @click="goToSearchPage"
@@ -401,6 +406,8 @@ onUnmounted(() => {
             <button
               @click.stop="toggleNotifications"
               class="relative p-2 text-slate-400 hover:text-white transition-colors"
+              aria-label="Notificações"
+              :aria-expanded="notificationsOpen"
             >
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -416,7 +423,7 @@ onUnmounted(() => {
             <!-- Notifications Dropdown -->
             <div
               v-if="notificationsOpen"
-              class="absolute right-0 mt-2 w-80 bg-slate-800 rounded-lg shadow-lg border border-slate-700 overflow-hidden z-50"
+              class="absolute right-0 mt-2 w-80 bg-slate-800 border border-slate-700/60 rounded-lg shadow-xl shadow-black/40 border border-slate-700 overflow-hidden z-50"
             >
               <div class="flex items-center justify-between px-4 py-3 border-b border-slate-700">
                 <h3 class="text-white font-semibold">Notificações</h3>
@@ -491,8 +498,14 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <div class="relative group">
-            <NuxtLink to="/perfil">
+          <div class="relative group profile-menu-container">
+            <button
+              type="button"
+              class="block"
+              aria-label="Abrir menu do perfil"
+              :aria-expanded="profileMenuOpen"
+              @click.stop="profileMenuOpen = !profileMenuOpen"
+            >
               <img
                 v-if="user?.profileImageUrl"
                 :src="user.profileImageUrl"
@@ -507,16 +520,22 @@ onUnmounted(() => {
                   {{ user?.name?.charAt(0).toUpperCase() }}
                 </span>
               </div>
-            </NuxtLink>
-            <div class="absolute right-0 mt-2 w-48 bg-slate-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+            </button>
+            <div
+              class="absolute right-0 mt-2 w-48 bg-slate-800 border border-slate-700/60 rounded-lg shadow-xl shadow-black/40 transition-all z-50"
+              :class="profileMenuOpen
+                ? 'opacity-100 visible'
+                : 'opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible'"
+            >
               <NuxtLink
                 to="/perfil"
                 class="block px-4 py-2 text-slate-300 hover:bg-slate-700 rounded-t-lg"
+                @click="profileMenuOpen = false"
               >
                 Meu Perfil
               </NuxtLink>
               <button
-                @click="logout"
+                @click="profileMenuOpen = false; logout()"
                 class="w-full text-left px-4 py-2 text-slate-300 hover:bg-slate-700 rounded-b-lg"
               >
                 Sair
@@ -534,7 +553,7 @@ onUnmounted(() => {
           </NuxtLink>
           <NuxtLink
             to="/cadastro"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+            class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-colors"
           >
             Cadastrar
           </NuxtLink>
@@ -544,6 +563,8 @@ onUnmounted(() => {
       <button
         @click="mobileMenuOpen = !mobileMenuOpen"
         class="md:hidden text-slate-300 hover:text-white p-2"
+        :aria-label="mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'"
+        :aria-expanded="mobileMenuOpen"
       >
         <svg v-if="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -589,7 +610,7 @@ onUnmounted(() => {
 
         <div
           v-if="showResults && searchQuery.trim()"
-          class="absolute top-full left-0 right-0 mt-2 bg-slate-800 rounded-lg shadow-lg border border-slate-700 overflow-hidden z-50 max-h-80 overflow-y-auto"
+          class="absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-700/60 rounded-lg shadow-xl shadow-black/40 border border-slate-700 overflow-hidden z-50 max-h-80 overflow-y-auto"
         >
 
           <button
@@ -794,7 +815,7 @@ onUnmounted(() => {
           </NuxtLink>
           <NuxtLink
             to="/cadastro"
-            class="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+            class="flex-1 text-center bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-colors"
             @click="mobileMenuOpen = false"
           >
             Cadastrar

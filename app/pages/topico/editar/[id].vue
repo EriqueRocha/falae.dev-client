@@ -1,4 +1,9 @@
 <script setup lang="ts">
+useSeoMeta({
+  title: 'Editar tópico · Falae.dev',
+  description: 'Edite seu tópico.',
+})
+
 import { markdownToHtml } from '~/utils/markdownToHtml'
 
 interface Topic {
@@ -172,7 +177,7 @@ onMounted(() => {
   <div class="max-w-7xl mx-auto px-0 sm:px-6 py-0 sm:py-8">
     <div class="bg-slate-900 sm:rounded-xl p-4 sm:p-6 md:p-8 sm:border border-slate-800">
       <div v-if="loading" class="flex items-center justify-center py-12">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div class="animate-spin rounded-full h-8 w-8 border-2 border-slate-700 border-t-blue-500"></div>
         <span class="ml-3 text-slate-400">Carregando topico...</span>
       </div>
 

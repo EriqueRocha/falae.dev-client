@@ -1,4 +1,9 @@
 <script setup lang="ts">
+useSeoMeta({
+  title: 'Verificar e-mail · Falae.dev',
+  description: 'Confirme seu endereço de e-mail.',
+})
+
 const route = useRoute()
 const { verifyEmail, user, isAuthenticated } = useAuth()
 
@@ -49,7 +54,7 @@ onMounted(async () => {
         v-if="status === 'loading'"
         class="bg-slate-900 rounded-xl p-8 border border-slate-800 text-center"
       >
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+        <div class="animate-spin rounded-full h-12 w-12 border-2 border-slate-700 border-t-blue-500 mx-auto mb-4"></div>
         <h1 class="text-xl font-bold text-white mb-2">Verificando email...</h1>
         <p class="text-slate-400">Aguarde enquanto verificamos seu email.</p>
       </div>

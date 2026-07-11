@@ -41,6 +41,8 @@ const handleKeydown = (e: KeyboardEvent) => {
     handleClose()
   }
 }
+
+useModalBehavior(() => props.isOpen, handleKeydown)
 </script>
 
 <template>
@@ -50,11 +52,10 @@ const handleKeydown = (e: KeyboardEvent) => {
         v-if="isOpen"
         class="modal-overlay"
         @click.self="handleClose"
-        @keydown="handleKeydown"
       >
-        <div class="modal-content">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="md-link-modal-title">
           <div class="modal-header">
-            <h3 class="modal-title">Inserir Link</h3>
+            <h3 id="md-link-modal-title" class="modal-title">Inserir Link</h3>
             <button
               type="button"
               class="close-btn"
@@ -124,6 +125,8 @@ const handleKeydown = (e: KeyboardEvent) => {
   justify-content: center;
   z-index: 100;
   backdrop-filter: blur(2px);
+  overflow-y: auto;
+  padding: 1rem;
 }
 
 .modal-content {
@@ -132,8 +135,9 @@ const handleKeydown = (e: KeyboardEvent) => {
   border-radius: 0.75rem;
   width: 100%;
   max-width: 28rem;
-  margin: 1rem;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .modal-header {
@@ -231,12 +235,12 @@ const handleKeydown = (e: KeyboardEvent) => {
 }
 
 .btn-submit {
-  background-color: rgb(59 130 246);
+  background-color: rgb(37 99 235); /* blue-600 */
   color: white;
 }
 
 .btn-submit:hover:not(:disabled) {
-  background-color: rgb(37 99 235);
+  background-color: rgb(59 130 246); /* blue-500 */
 }
 
 .btn-submit:disabled {

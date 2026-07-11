@@ -270,7 +270,7 @@ watch(articleContent, async () => {
 <template>
   <div class="max-w-7xl mx-auto px-0 sm:px-6 py-0 sm:py-8">
     <div v-if="loading" class="flex justify-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-2 border-slate-700 border-t-blue-500"></div>
     </div>
 
     <div v-else-if="error" class="text-center py-20 px-4">
@@ -286,6 +286,8 @@ watch(articleContent, async () => {
           :src="article.coverImage"
           :alt="article.title"
           class="w-full h-full object-cover"
+          fetchpriority="high"
+          decoding="async"
         />
       </div>
 
@@ -466,10 +468,13 @@ watch(articleContent, async () => {
 
 .article-content :deep(p) {
   @apply text-slate-300 leading-relaxed mb-4;
+  overflow-wrap: break-word;
 }
 
 .article-content :deep(a) {
   @apply text-blue-400 hover:text-blue-300 underline;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .article-content :deep(ul),

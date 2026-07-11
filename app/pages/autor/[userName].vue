@@ -7,6 +7,12 @@ const { user, isAuthenticated, updateProfile, resendVerificationEmail, setEmailV
 const userName = computed(() => route.params.userName as string)
 const isOwnProfile = computed(() => isAuthenticated.value && user.value?.userName === userName.value)
 
+useSeoMeta({
+  title: () => `@${userName.value} · Falae.dev`,
+  ogTitle: () => `@${userName.value} · Falae.dev`,
+  description: () => `Artigos, tópicos e comentários de @${userName.value} no Falae.dev.`,
+})
+
 const showEditModal = ref(false)
 const editLoading = ref(false)
 const editError = ref('')
@@ -390,14 +396,16 @@ const filters = computed(() => {
   return baseFilters
 })
 
-const articlesLeft = computed(() => articles.value.filter((_, i) => i % 2 === 0))
-const articlesRight = computed(() => articles.value.filter((_, i) => i % 2 === 1))
-const draftsLeft = computed(() => drafts.value.filter((_, i) => i % 2 === 0))
-const draftsRight = computed(() => drafts.value.filter((_, i) => i % 2 === 1))
-const topicsLeft = computed(() => topics.value.filter((_, i) => i % 2 === 0))
-const topicsRight = computed(() => topics.value.filter((_, i) => i % 2 === 1))
-const commentsLeft = computed(() => comments.value.filter((_, i) => i % 2 === 0))
-const commentsRight = computed(() => comments.value.filter((_, i) => i % 2 === 1))
+//no mobile as colunas empilham, usar coluna unica pra preservar a ordem
+const isSingleColumn = useIsMobile(768)
+const splitColumns = <T>(items: T[]): T[][] => isSingleColumn.value
+  ? [items]
+  : [items.filter((_, i) => i % 2 === 0), items.filter((_, i) => i % 2 === 1)]
+
+const articlesColumns = computed(() => splitColumns(articles.value))
+const draftsColumns = computed(() => splitColumns(drafts.value))
+const topicsColumns = computed(() => splitColumns(topics.value))
+const commentsColumns = computed(() => splitColumns(comments.value))
 
 const sortOptions = [
   { value: 'RECENT' as SortType, label: 'Recentes' },
@@ -486,8 +494,7 @@ onMounted(async () => {
   }
 
   try {
-    await fetchProfile()
-    await fetchArticles(0, true)
+    await Promise.all([fetchProfile(), fetchArticles(0, true)])
   } catch (e) {
     error.value = 'Erro ao carregar perfil'
   } finally {
@@ -503,7 +510,7 @@ onUnmounted(() => {
 <template>
   <div class="max-w-7xl mx-auto px-6 py-8">
     <div v-if="loading" class="flex justify-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-2 border-slate-700 border-t-blue-500"></div>
     </div>
 
     <div v-else-if="error" class="text-center py-20">
@@ -694,43 +701,8 @@ onUnmounted(() => {
               Nenhum artigo publicado ainda.
             </div>
             <div v-else class="flex flex-col md:flex-row gap-6">
-              <div class="flex-1 space-y-6">
-                <div v-for="article in articlesLeft" :key="article.id" class="relative group">
-                  <button
-                    v-if="isOwnProfile"
-                    type="button"
-                    @click.prevent.stop="openDeleteModal(article.id, 'artigo', article.title)"
-                    class="absolute top-3 right-3 z-10 p-2 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-                    title="Deletar artigo"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                  <NuxtLink :to="`/artigo/${userName}/${article.slug}`" class="block">
-                    <ArticleCard
-                      :article="{
-                        id: article.id,
-                        title: article.title,
-                        excerpt: article.description,
-                        tags: article.tags || [],
-                        author: { name: article.authorName, userName: article.authorUserName, avatar: profile?.profileImageUrl || undefined },
-                        date: article.creationDate,
-                        likes: article.likesCount,
-                        dislikes: article.dislikesCount,
-                        comments: article.commentsCount,
-                        saves: article.savesCount,
-                        coverImage: article.coverImage,
-                        isLiked: article.isLiked,
-                        isDisliked: article.isDisliked,
-                        isSaved: article.isSaved
-                      }"
-                    />
-                  </NuxtLink>
-                </div>
-              </div>
-              <div class="flex-1 space-y-6">
-                <div v-for="article in articlesRight" :key="article.id" class="relative group">
+              <div v-for="(column, columnIndex) in articlesColumns" :key="columnIndex" class="flex-1 min-w-0 space-y-6">
+                <div v-for="article in column" :key="article.id" class="relative group">
                   <button
                     v-if="isOwnProfile"
                     type="button"
@@ -772,42 +744,8 @@ onUnmounted(() => {
               Nenhum rascunho salvo ainda.
             </div>
             <div v-else class="flex flex-col md:flex-row gap-6">
-              <div class="flex-1 space-y-6">
-                <div v-for="draft in draftsLeft" :key="draft.id" class="relative group">
-                  <button
-                    type="button"
-                    @click.prevent.stop="openDeleteModal(draft.id, 'artigo', draft.title)"
-                    class="absolute top-3 right-3 z-10 p-2 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-                    title="Deletar rascunho"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                  <NuxtLink :to="`/artigo/editar/${draft.id}`" class="block">
-                    <ArticleCard
-                      :article="{
-                        id: draft.id,
-                        title: draft.title,
-                        excerpt: draft.description,
-                        tags: draft.tags || [],
-                        author: { name: draft.authorName, userName: draft.authorUserName, avatar: profile?.profileImageUrl || undefined },
-                        date: draft.creationDate,
-                        likes: draft.likesCount,
-                        dislikes: draft.dislikesCount,
-                        comments: draft.commentsCount,
-                        saves: draft.savesCount,
-                        coverImage: draft.coverImage,
-                        isLiked: draft.isLiked,
-                        isDisliked: draft.isDisliked,
-                        isSaved: draft.isSaved
-                      }"
-                    />
-                  </NuxtLink>
-                </div>
-              </div>
-              <div class="flex-1 space-y-6">
-                <div v-for="draft in draftsRight" :key="draft.id" class="relative group">
+              <div v-for="(column, columnIndex) in draftsColumns" :key="columnIndex" class="flex-1 min-w-0 space-y-6">
+                <div v-for="draft in column" :key="draft.id" class="relative group">
                   <button
                     type="button"
                     @click.prevent.stop="openDeleteModal(draft.id, 'artigo', draft.title)"
@@ -848,40 +786,8 @@ onUnmounted(() => {
               Nenhum topico criado ainda.
             </div>
             <div v-else class="flex flex-col md:flex-row gap-6">
-              <div class="flex-1 space-y-6">
-                <div v-for="topic in topicsLeft" :key="topic.id" class="relative group">
-                  <button
-                    v-if="isOwnProfile"
-                    type="button"
-                    @click.prevent.stop="openDeleteModal(topic.id, 'topico', topic.title)"
-                    class="absolute top-3 right-3 z-10 p-2 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-                    title="Deletar topico"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                  <NuxtLink :to="`/topico/${userName}/${topic.slug}`" class="block">
-                    <TopicCard
-                      :topic="{
-                        id: topic.id,
-                        title: topic.title,
-                        excerpt: topic.topicContent,
-                        tags: topic.tags || [],
-                        author: { name: topic.authorName, userName: topic.authorUserName, avatar: profile?.profileImageUrl || undefined },
-                        date: topic.creationDate,
-                        likes: topic.likesCount,
-                        dislikes: topic.dislikesCount,
-                        comments: topic.commentsCount,
-                        isLiked: topic.isLiked,
-                        isDisliked: topic.isDisliked
-                      }"
-                    />
-                  </NuxtLink>
-                </div>
-              </div>
-              <div class="flex-1 space-y-6">
-                <div v-for="topic in topicsRight" :key="topic.id" class="relative group">
+              <div v-for="(column, columnIndex) in topicsColumns" :key="columnIndex" class="flex-1 min-w-0 space-y-6">
+                <div v-for="topic in column" :key="topic.id" class="relative group">
                   <button
                     v-if="isOwnProfile"
                     type="button"
@@ -920,48 +826,16 @@ onUnmounted(() => {
               Nenhum comentario feito ainda.
             </div>
             <div v-else class="flex flex-col md:flex-row gap-6">
-              <div class="flex-1 space-y-6">
-                <div v-for="comment in commentsLeft" :key="comment.id" class="relative group">
+              <div v-for="(column, columnIndex) in commentsColumns" :key="columnIndex" class="flex-1 min-w-0 space-y-6">
+                <div v-for="comment in column" :key="comment.id" class="relative group">
                   <button
                     v-if="isOwnProfile"
                     type="button"
                     @click.prevent.stop="openDeleteModal(comment.id, 'comentario', comment.content.substring(0, 50) + (comment.content.length > 50 ? '...' : ''))"
-                    class="absolute top-3 right-3 z-10 p-1.5 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                    class="absolute top-3 right-3 z-10 p-2 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                     title="Deletar comentario"
                   >
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                  <NuxtLink :to="getCommentUrl(comment)" class="block">
-                    <CommentCard
-                      :comment="{
-                        id: comment.id,
-                        content: comment.content,
-                        author: { name: comment.authorName, userName: userName as string, avatar: profile?.profileImageUrl || undefined },
-                        date: comment.createdAt,
-                        likes: comment.likes,
-                        dislikes: comment.dislikes,
-                        parentType: comment.articleId ? 'ARTICLE' : 'TOPIC',
-                        parentTitle: comment.parentTitle,
-                        isLiked: comment.isLiked,
-                        isDisliked: comment.isDisliked,
-                        tags: comment.tags
-                      }"
-                    />
-                  </NuxtLink>
-                </div>
-              </div>
-              <div class="flex-1 space-y-6">
-                <div v-for="comment in commentsRight" :key="comment.id" class="relative group">
-                  <button
-                    v-if="isOwnProfile"
-                    type="button"
-                    @click.prevent.stop="openDeleteModal(comment.id, 'comentario', comment.content.substring(0, 50) + (comment.content.length > 50 ? '...' : ''))"
-                    class="absolute top-3 right-3 z-10 p-1.5 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-                    title="Deletar comentario"
-                  >
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                   </button>
@@ -990,7 +864,7 @@ onUnmounted(() => {
           <div ref="sentinel" class="h-4"></div>
 
           <div v-if="loadingMore" class="flex justify-center py-8">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <div class="animate-spin rounded-full h-8 w-8 border-2 border-slate-700 border-t-blue-500"></div>
           </div>
         </section>
       </main>

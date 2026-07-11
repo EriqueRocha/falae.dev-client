@@ -43,6 +43,28 @@ const userName = computed(() => route.params.userName as string)
 const slug = computed(() => route.params.slug as string)
 const highlightCommentId = computed(() => route.query.commentId as string | undefined)
 
+const topicDescription = computed(() => {
+  const content = topic.value?.topicContent ?? ''
+  return content.replace(/[#*`>\[\]\n]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
+})
+
+useSeoMeta({
+  title: () => topic.value?.title ?? 'Falae.dev',
+  ogTitle: () => topic.value?.title ?? 'Falae.dev',
+  description: () => topicDescription.value,
+  ogDescription: () => topicDescription.value,
+  ogType: 'article',
+  twitterCard: 'summary',
+  twitterTitle: () => topic.value?.title ?? 'Falae.dev',
+})
+
+useHead({
+  meta: [
+    { property: 'og:site_name', content: 'Falae.dev' },
+    { property: 'article:author', content: () => topic.value?.authorName ?? '' },
+  ],
+})
+
 const fetchTopic = async () => {
   loading.value = true
   error.value = ''
@@ -166,7 +188,7 @@ watch(renderedContent, async () => {
 <template>
   <div class="max-w-7xl mx-auto px-0 sm:px-6 py-0 sm:py-8">
     <div v-if="loading" class="flex justify-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-2 border-slate-700 border-t-blue-500"></div>
     </div>
 
     <div v-else-if="error" class="text-center py-20 px-4">
@@ -300,10 +322,13 @@ watch(renderedContent, async () => {
 
 .topic-content :deep(p) {
   @apply text-slate-300 leading-relaxed mb-4;
+  overflow-wrap: break-word;
 }
 
 .topic-content :deep(a) {
   @apply text-blue-400 hover:text-blue-300 underline;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .topic-content :deep(ul),

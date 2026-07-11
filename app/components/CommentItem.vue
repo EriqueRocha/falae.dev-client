@@ -213,20 +213,7 @@ const submitReply = async () => {
   }
 }
 
-const isMobile = ref(false)
-
-const updateIsMobile = () => {
-  isMobile.value = window.innerWidth < 640
-}
-
-onMounted(() => {
-  updateIsMobile()
-  window.addEventListener('resize', updateIsMobile)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', updateIsMobile)
-})
+const isMobile = useIsMobile()
 
 const maxDepth = computed(() => isMobile.value ? 2 : 4)
 const maxVisualDepthMobile = 2
@@ -295,6 +282,8 @@ watch(() => props.highlightPath, (newPath) => {
             :src="comment.authorProfileImage"
             :alt="comment.authorName"
             class="w-6 h-6 sm:w-8 sm:h-8 rounded-full object-cover"
+            loading="lazy"
+            decoding="async"
           />
           <div
             v-else
@@ -309,6 +298,8 @@ watch(() => props.highlightPath, (newPath) => {
             :src="comment.authorProfileImage"
             :alt="comment.authorName"
             class="w-6 h-6 sm:w-8 sm:h-8 rounded-full object-cover"
+            loading="lazy"
+            decoding="async"
           />
           <div
             v-else
@@ -370,9 +361,11 @@ watch(() => props.highlightPath, (newPath) => {
           <button
             v-if="!comment.deleted"
             @click="toggleLike"
-            class="flex items-center gap-1 transition-colors"
+            class="flex items-center gap-1 py-1.5 px-1 -my-1 transition-colors"
             :class="isLiked ? 'text-green-400' : 'text-slate-500 hover:text-green-400'"
             :disabled="!isAuthenticated"
+            :aria-label="isLiked ? 'Remover curtida' : 'Curtir comentário'"
+            :aria-pressed="isLiked"
           >
             <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
@@ -383,9 +376,11 @@ watch(() => props.highlightPath, (newPath) => {
           <button
             v-if="!comment.deleted"
             @click="toggleDislike"
-            class="flex items-center gap-1 transition-colors"
+            class="flex items-center gap-1 py-1.5 px-1 -my-1 transition-colors"
             :class="isDisliked ? 'text-red-400' : 'text-slate-500 hover:text-red-400'"
             :disabled="!isAuthenticated"
+            :aria-label="isDisliked ? 'Remover descurtida' : 'Descurtir comentário'"
+            :aria-pressed="isDisliked"
           >
             <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
@@ -396,7 +391,7 @@ watch(() => props.highlightPath, (newPath) => {
           <button
             v-if="canReply && isAuthenticated && !comment.deleted"
             @click="showReplyForm = !showReplyForm"
-            class="text-slate-500 hover:text-blue-400 transition-colors"
+            class="py-1.5 px-1 -my-1 text-slate-500 hover:text-blue-400 transition-colors"
           >
             Responder
           </button>
@@ -404,7 +399,7 @@ watch(() => props.highlightPath, (newPath) => {
           <button
             v-if="replyCount > 0 && !canContinueThread"
             @click="toggleReplies"
-            class="text-slate-500 hover:text-blue-400 transition-colors flex items-center gap-1"
+            class="py-1.5 px-1 -my-1 text-slate-500 hover:text-blue-400 transition-colors flex items-center gap-1"
           >
             <svg
               class="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform"
@@ -422,7 +417,7 @@ watch(() => props.highlightPath, (newPath) => {
           <button
             v-if="canContinueThread"
             @click="handleContinueThread"
-            class="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
+            class="py-1.5 px-1 -my-1 text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
           >
             <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -457,7 +452,7 @@ watch(() => props.highlightPath, (newPath) => {
                 <span class="text-xs text-slate-500">Tags</span>
                 <button
                   @click="showReplyTagInput = false; replyTags = []"
-                  class="text-xs text-slate-600 hover:text-slate-500"
+                  class="text-xs text-slate-400 hover:text-slate-300"
                 >
                   Remover
                 </button>
@@ -484,7 +479,7 @@ watch(() => props.highlightPath, (newPath) => {
         </div>
 
         <div v-if="loadingReplies" class="mt-3 flex items-center gap-2 text-slate-500 text-sm">
-          <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+          <div class="animate-spin rounded-full h-4 w-4 border-2 border-slate-700 border-t-blue-500"></div>
           Carregando respostas...
         </div>
 

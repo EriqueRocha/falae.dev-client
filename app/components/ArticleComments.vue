@@ -196,7 +196,7 @@ const loadHighlightedComment = async () => {
 
     const targetComment = chain[chain.length - 1]
 
-    if (targetComment.depth >= maxDepth) {ew
+    if (targetComment.depth >= maxDepth) {
       const targetDisplayDepth = 2
       const breakpointDepth = Math.max(0, targetComment.depth - targetDisplayDepth)
 
@@ -318,7 +318,7 @@ onMounted(async () => {
     </div>
 
     <div v-if="loading" class="flex justify-center py-8">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      <div class="animate-spin rounded-full h-8 w-8 border-2 border-slate-700 border-t-blue-500"></div>
     </div>
 
     <div v-else-if="error" class="text-center py-8">
@@ -354,7 +354,7 @@ onMounted(async () => {
     </div>
 
     <div v-if="isInThreadView && loadingThreadReplies" class="flex justify-center py-8">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      <div class="animate-spin rounded-full h-8 w-8 border-2 border-slate-700 border-t-blue-500"></div>
     </div>
 
     <div v-else-if="isInThreadView && threadReplies.length === 0 && !loadingThreadReplies" class="text-center py-8">

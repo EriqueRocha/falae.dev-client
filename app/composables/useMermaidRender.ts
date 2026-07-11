@@ -1,6 +1,4 @@
-import mermaid from 'mermaid'
-
-let isInitialized = false
+import { loadMermaid } from '~/utils/loadMermaid'
 
 /**
  * Composable para renderizar diagramas Mermaid em conteúdo HTML
@@ -9,19 +7,6 @@ let isInitialized = false
  * - <pre><code class="language-mermaid">...</code></pre> (artigos Markdown)
  */
 export function useMermaidRender() {
-  const initMermaid = () => {
-    if (!isInitialized) {
-      mermaid.initialize({
-        startOnLoad: false,
-        theme: 'dark',
-        securityLevel: 'loose',
-        fontFamily: 'ui-sans-serif, system-ui, sans-serif',
-        suppressErrorRendering: true
-      })
-      isInitialized = true
-    }
-  }
-
   /**
    * Renderiza todos os diagramas Mermaid dentro de um container
    * @param container - Elemento DOM que contém o HTML com diagramas
@@ -29,10 +14,13 @@ export function useMermaidRender() {
   const renderMermaidInContainer = async (container: HTMLElement | null) => {
     if (!container) return
 
-    initMermaid()
+    const mermaidDivs = container.querySelectorAll<HTMLElement>('div[data-mermaid], div[data-type="mermaid"]')
+    const codeBlocks = container.querySelectorAll<HTMLElement>('pre > code.language-mermaid')
+
+    //sem diagramas na página não baixa o mermaid
+    if (mermaidDivs.length === 0 && codeBlocks.length === 0) return
 
     //1 processa divs com data-mermaid (artigos HTML)
-    const mermaidDivs = container.querySelectorAll<HTMLElement>('div[data-mermaid], div[data-type="mermaid"]')
     for (const div of mermaidDivs) {
       const code = div.dataset.mermaid || div.textContent || ''
       if (code.trim()) {
@@ -41,7 +29,6 @@ export function useMermaidRender() {
     }
 
     //2 processa blocos de código mermaid (artigos Markdown)
-    const codeBlocks = container.querySelectorAll<HTMLElement>('pre > code.language-mermaid')
     for (const codeBlock of codeBlocks) {
       const code = codeBlock.textContent || ''
       const preElement = codeBlock.parentElement
@@ -60,9 +47,10 @@ export function useMermaidRender() {
    */
   const renderDiagram = async (element: HTMLElement, code: string) => {
     try {
+      const mermaid = await loadMermaid()
       //decodifica entidades HTML
       const decodedCode = decodeHtmlEntities(code)
-      const id = `mermaid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      const id = `mermaid-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
       const { svg } = await mermaid.render(id, decodedCode)
       element.innerHTML = svg
       element.classList.add('mermaid-rendered')

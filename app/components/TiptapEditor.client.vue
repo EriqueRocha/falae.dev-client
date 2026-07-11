@@ -2,7 +2,7 @@
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import { StarterKit } from '@tiptap/starter-kit'
 import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight'
-import { common, createLowlight } from 'lowlight'
+import { lowlight } from '~/utils/lowlight'
 import { Underline } from '@tiptap/extension-underline'
 import { Highlight } from '@tiptap/extension-highlight'
 import { TextAlign } from '@tiptap/extension-text-align'
@@ -166,8 +166,6 @@ const toggleEditorMode = () => {
   const newMode = editorMode.value === 'html' ? 'markdown' : 'html'
   tryChangeMode(newMode)
 }
-
-const lowlight = createLowlight(common)
 
 const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:\S*)?/
 

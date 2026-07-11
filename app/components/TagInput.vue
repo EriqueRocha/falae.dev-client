@@ -67,13 +67,14 @@ const focusInput = () => {
     <span
       v-for="tag in modelValue"
       :key="tag"
-      class="inline-flex items-center gap-1 px-2 py-1 bg-blue-600/20 text-blue-400 rounded text-sm"
+      class="inline-flex items-center gap-1 px-2 py-1 bg-blue-600/20 text-blue-400 rounded-md text-sm"
     >
       #{{ tag }}
       <button
         type="button"
         @click.stop="removeTag(tag)"
-        class="hover:text-blue-200 transition-colors"
+        class="p-1.5 -m-1 hover:text-blue-200 transition-colors"
+        :aria-label="`Remover tag ${tag}`"
       >
         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

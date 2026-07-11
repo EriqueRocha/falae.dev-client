@@ -1,4 +1,9 @@
 <script setup lang="ts">
+useSeoMeta({
+  title: 'Novo tópico · Falae.dev',
+  description: 'Inicie uma nova discussão.',
+})
+
 const { isAuthenticated } = useAuth()
 const config = useRuntimeConfig()
 const apiBase = config.public.apiBase
@@ -139,7 +144,8 @@ const handleSubmit = async () => {
               <button
                   type="button"
                   @click="removeTag(index)"
-                  class="hover:text-blue-200 transition-colors"
+                  class="p-1.5 -m-1 hover:text-blue-200 transition-colors"
+                  :aria-label="`Remover tag ${tag}`"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

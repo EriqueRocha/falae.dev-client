@@ -1,4 +1,9 @@
 <script setup lang="ts">
+useSeoMeta({
+  title: 'Entrar · Falae.dev',
+  description: 'Entre na sua conta do Falae.dev.',
+})
+
 const { login, isAuthenticated } = useAuth()
 
 const email = ref('')
@@ -45,7 +50,7 @@ const handleSubmit = async () => {
 
 <template>
   <div class="flex items-center justify-center min-h-[calc(100vh-64px)] px-4">
-    <div class="w-full max-w-md bg-slate-900 rounded-xl p-8 border border-slate-800">
+    <div class="w-full max-w-md bg-slate-900 rounded-2xl p-8 border border-slate-800 shadow-2xl shadow-black/40">
       <h1 class="text-2xl font-bold text-white text-center mb-8">Entrar</h1>
 
       <div class="space-y-4 mb-6">
@@ -59,29 +64,41 @@ const handleSubmit = async () => {
       </div>
 
       <form @submit.prevent="handleSubmit" class="space-y-4">
-        <div v-if="error" class="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded-lg text-sm">
+        <div v-if="error" role="alert" class="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded-lg text-sm">
           {{ error }}
         </div>
 
-        <input
-          v-model="email"
-          type="email"
-          placeholder="Email"
-          class="w-full bg-slate-800 text-white placeholder-slate-500 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div>
+          <label for="login-email" class="sr-only">Email</label>
+          <input
+            id="login-email"
+            v-model="email"
+            type="email"
+            name="email"
+            autocomplete="email"
+            inputmode="email"
+            placeholder="Email"
+            class="w-full bg-slate-800 text-white placeholder-slate-500 border border-slate-700/60 rounded-lg px-4 py-3 transition-colors focus:outline-none focus:border-transparent focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
         <div class="relative">
+          <label for="login-password" class="sr-only">Senha</label>
           <input
+            id="login-password"
             v-model="password"
             :type="showPassword ? 'text' : 'password'"
+            name="password"
+            autocomplete="current-password"
             placeholder="Senha"
-            class="w-full bg-slate-800 text-white placeholder-slate-500 rounded-lg px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full bg-slate-800 text-white placeholder-slate-500 border border-slate-700/60 rounded-lg px-4 py-3 pr-12 transition-colors focus:outline-none focus:border-transparent focus:ring-2 focus:ring-blue-500"
           />
           <button
             type="button"
             @click="showPassword = !showPassword"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+            class="absolute right-3 top-1/2 -translate-y-1/2 p-2 -m-2 text-slate-400 hover:text-white transition-colors"
             :title="showPassword ? 'Ocultar senha' : 'Mostrar senha'"
+            :aria-label="showPassword ? 'Ocultar senha' : 'Mostrar senha'"
           >
             <svg v-if="showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
@@ -96,7 +113,7 @@ const handleSubmit = async () => {
         <button
           type="submit"
           :disabled="loading"
-          class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white font-medium py-3 rounded-lg transition-colors"
+          class="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white font-medium py-3 rounded-lg shadow-lg shadow-blue-600/20 hover:shadow-blue-500/30 active:scale-[0.99] transition-all"
         >
           {{ loading ? 'Entrando...' : 'Entrar' }}
         </button>

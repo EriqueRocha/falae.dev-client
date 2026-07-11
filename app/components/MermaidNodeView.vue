@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NodeViewWrapper } from '@tiptap/vue-3'
-import mermaid from 'mermaid'
+import { loadMermaid } from '~/utils/loadMermaid'
 import { ref, watch, onMounted, nextTick } from 'vue'
 
 const props = defineProps<{
@@ -20,13 +20,13 @@ const emit = defineEmits<{
 const containerRef = ref<HTMLDivElement | null>(null)
 const hasError = ref(false)
 const errorMessage = ref('')
-const isInitialized = ref(false)
 
 const renderDiagram = async () => {
   if (!containerRef.value || !props.node.attrs.content) return
 
   try {
-    const id = `mermaid-node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const mermaid = await loadMermaid()
+    const id = `mermaid-node-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
     const { svg } = await mermaid.render(id, props.node.attrs.content)
     if (containerRef.value) {
       containerRef.value.innerHTML = svg
@@ -42,15 +42,6 @@ const renderDiagram = async () => {
 }
 
 onMounted(async () => {
-  if (!isInitialized.value) {
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: 'dark',
-      securityLevel: 'loose',
-      suppressErrorRendering: true
-    })
-    isInitialized.value = true
-  }
   await nextTick()
   renderDiagram()
 })
